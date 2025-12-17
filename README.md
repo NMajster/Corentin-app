@@ -412,6 +412,22 @@ erDiagram
         text contenu
         timestamp generated_at
     }
+    
+    REFERENCES_JURIDIQUES ||--o{ MODELES : utilisee_par
+    REFERENCES_JURIDIQUES {
+        uuid id PK
+        string type
+        string code_ou_juridiction
+        string reference
+        string intitule
+        text extrait
+        string url_source
+        string matiere
+        date date_decision
+        string mots_cles
+        boolean active
+        timestamp created_at
+    }
 ```
 
 ### Tables Principales
@@ -425,6 +441,16 @@ erDiagram
 | `modeles` | Templates de documents juridiques |
 | `documents` | Documents générés (assignations, courriers) |
 | `bordereaux` | Récapitulatifs des pièces indexées |
+| `references_juridiques` | Base légale et jurisprudentielle curatée |
+
+### Types de Références Juridiques
+
+| Type | Exemple |
+|------|---------|
+| `article_loi` | Article L133-18 Code monétaire et financier |
+| `jurisprudence` | Cass. com., 12 nov. 2020, n°19-12.345 |
+| `directive` | Directive DSP2 (UE) 2015/2366 |
+| `reglement` | Règlement délégué (UE) 2018/389 |
 
 ---
 
