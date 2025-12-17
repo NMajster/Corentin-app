@@ -1,12 +1,52 @@
-# 🏛️ Plateforme Fraude Bancaire - Assistance Juridique
+# 🏛️ Plateforme de Défense des Épargnants
 
-> **Cabinet spécialisé dans la défense des victimes de fraudes bancaires**
+> **Rétablir le rapport de force face aux institutions financières**
 
 ## 📋 Vision du Projet
 
-Plateforme juridique permettant aux victimes de fraude bancaire d'accéder à une défense de qualité à coût maîtrisé, grâce à l'automatisation des tâches répétitives (classification de pièces, génération de documents).
+### Mission
 
-### Le Problème
+Permettre aux particuliers floués par les institutions bancaires, assurantielles ou financières d'accéder à une **justice de qualité à un coût compatible avec leur préjudice**.
+
+Face aux grandes institutions qui utilisent la technique **"Deny, Delay, Defend"** (nier, retarder, défendre), les clients sont souvent démunis. Le coût d'une procédure judiciaire dépasse fréquemment l'enjeu financier, décourageant toute action.
+
+### Notre Approche
+
+Grâce à l'**automatisation intelligente** (classification de pièces, génération de documents juridiques), nous réduisons drastiquement le coût de traitement des dossiers, rendant ces procédures économiquement viables.
+
+### Roadmap Multi-Contentieux
+
+```mermaid
+flowchart LR
+    subgraph phase1 [Phase 1 - MVP]
+        Fraude[Fraude Bancaire]
+    end
+    
+    subgraph phase2 [Phase 2]
+        Assurance[Litiges Assurance]
+        Credit[Crédit conso abusif]
+    end
+    
+    subgraph phase3 [Phase 3]
+        Investissement[Placements toxiques]
+        Crypto[Arnaques crypto]
+        Autres[Autres contentieux]
+    end
+    
+    phase1 --> phase2 --> phase3
+```
+
+| Phase | Contentieux | Cible |
+|-------|-------------|-------|
+| **Phase 1** | Fraude bancaire (faux conseiller) | Victimes de spoofing, phishing |
+| **Phase 2** | Assurances, crédits abusifs | Clients lésés par refus de garantie |
+| **Phase 3** | Investissements, crypto | Victimes de placements toxiques |
+
+---
+
+## 🎯 Phase 1 : Fraude Bancaire
+
+### Le Problème Spécifique
 
 Les banques utilisent la technique **"Deny, Delay, Defend"** face aux victimes de fraude :
 - Refus systématique de remboursement
@@ -15,9 +55,9 @@ Les banques utilisent la technique **"Deny, Delay, Defend"** face aux victimes d
 
 ### Notre Solution
 
-- ✅ Process automatisé = coûts réduits de 40%
-- ✅ Expertise d'un ancien magistrat
-- ✅ Plateforme ergonomique pour le suivi de dossier
+- Process automatisé = coûts réduits de 40%
+- Expertise d'un ancien magistrat
+- Plateforme ergonomique pour le suivi de dossier
 
 ---
 
@@ -161,6 +201,127 @@ flowchart LR
 - 🚔 Dépôt de plainte
 - 🪪 Pièce d'identité
 - 🏠 Justificatif de domicile
+
+---
+
+## ⚖️ Back-Office Avocat
+
+### Architecture Générale
+
+```mermaid
+flowchart TB
+    subgraph donnees [Sources de Données Client]
+        Profil[Profil inscription]
+        Formulaire[Formulaire post-entretien]
+        Pieces[Pièces importées]
+    end
+    
+    subgraph backoffice [Back-Office Avocat]
+        Bibliotheque[Bibliothèque de modèles]
+        Editeur[Éditeur de document]
+        Indexation[Système indexation pièces]
+        Bordereau[Générateur bordereau]
+    end
+    
+    subgraph output [Sortie]
+        PDF[Export PDF final]
+        Dossier[Dossier complet numéroté]
+    end
+    
+    Profil --> Editeur
+    Formulaire --> Editeur
+    Bibliotheque --> Editeur
+    Pieces --> Indexation
+    Indexation --> Bordereau
+    Editeur --> PDF
+    Bordereau --> PDF
+    Indexation --> Dossier
+```
+
+### Gestion des Modèles
+
+| Élément | Description |
+|---------|-------------|
+| **Bibliothèque** | Stockage des modèles dans Supabase |
+| **Matières** | Plusieurs modèles par type de contentieux |
+| **Versioning** | Historique des modifications |
+
+### Structure des Documents
+
+Chaque modèle contient 3 types de zones :
+
+```mermaid
+flowchart LR
+    subgraph document [Structure du Document]
+        Auto[Zones Auto-remplies]
+        Fixes[Zones Fixes]
+        Libres[Zones Libres]
+    end
+    
+    Auto -->|Nom, prénom, adresse...| Source1[Profil client]
+    Auto -->|Date naissance, etc.| Source2[Formulaire complémentaire]
+    Fixes -->|Modifiable sur demande| Avocat[Contrôle avocat]
+    Libres -->|Les Faits, argumentation| Redaction[Rédaction avocat]
+```
+
+| Type de zone | Comportement | Exemple |
+|--------------|--------------|---------|
+| **Auto-remplie** | Données injectées automatiquement depuis profil + formulaire | Nom, prénom, adresse, date/lieu naissance |
+| **Fixe** | Verrouillée par défaut, modifiable sur demande | Mentions légales, formules juridiques |
+| **Libre** | Rédaction manuelle par l'avocat | "Les Faits", argumentation |
+
+### Système d'Indexation des Pièces
+
+```mermaid
+flowchart TD
+    A[Avocat rédige assignation] --> B[Indexe une pièce du client]
+    B --> C[Numérotation automatique]
+    C --> D[Pièce 1, Pièce 2, etc.]
+    D --> E[Mise à jour bordereau]
+    E --> F[Rubrique pièces numérotées]
+    F --> G[Export PDF complet]
+    
+    subgraph bordereau [Bordereau de Pièces]
+        H[Liste récapitulative]
+        I[Numérotation séquentielle]
+        J[Modifiable par avocat]
+    end
+    
+    E --> bordereau
+```
+
+| Fonctionnalité | Description |
+|----------------|-------------|
+| **Indexation** | L'avocat référence des pièces client dans le document |
+| **Numérotation auto** | Les pièces sont numérotées dans l'ordre d'insertion |
+| **Bordereau** | Document récapitulatif généré automatiquement |
+| **Modification** | Le bordereau reste modifiable |
+| **Export PDF** | Pièces renumérotées dans une rubrique dédiée |
+
+### Flux de Données
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant EspaceClient as Espace Client
+    participant BackOffice as Back-Office
+    participant Supabase
+    
+    Client->>EspaceClient: Remplit profil inscription
+    EspaceClient->>Supabase: Stocke données profil
+    Client->>EspaceClient: Remplit formulaire complémentaire
+    EspaceClient->>Supabase: Stocke données complémentaires
+    Client->>EspaceClient: Importe pièces justificatives
+    EspaceClient->>Supabase: Stocke fichiers
+    
+    BackOffice->>Supabase: Charge modèle + données client
+    BackOffice->>BackOffice: Auto-remplit zones
+    BackOffice->>BackOffice: Avocat rédige parties libres
+    BackOffice->>BackOffice: Indexe pièces client
+    BackOffice->>BackOffice: Génère bordereau
+    BackOffice->>Supabase: Sauvegarde document
+    BackOffice->>EspaceClient: Document disponible pour client
+```
 
 ---
 
