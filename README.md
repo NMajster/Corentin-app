@@ -68,11 +68,15 @@ flowchart TD
     E --> F[Paiement entretien - Stripe]
     F --> G[Confirmation + Accès espace client]
     G --> H[Entretien avec avocat]
-    H --> I{Dossier recevable ?}
-    I -->|Non| K[Conseils + Fin]
-    I -->|Oui| J[Convention honoraires signée en ligne]
-    J --> L[Import pièces justificatives]
-    L --> M[Suivi procédure dans dashboard]
+    H --> I[Convention honoraires signée en ligne]
+    I --> J[Import pièces justificatives]
+    J --> K[Rédaction courriers]
+    K --> L[Mise en demeure banque]
+    L --> M{Réponse banque ?}
+    M -->|Remboursement| N[Dossier clos - Succès]
+    M -->|Refus| O[Rédaction assignation]
+    O --> P[Procédure judiciaire]
+    P --> Q[Suivi dans dashboard]
 ```
 
 ---
