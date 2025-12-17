@@ -325,6 +325,109 @@ sequenceDiagram
 
 ---
 
+## 🗄️ Schéma Base de Données (Supabase)
+
+```mermaid
+erDiagram
+    USERS ||--o{ DOSSIERS : possede
+    USERS ||--o{ PIECES : importe
+    USERS {
+        uuid id PK
+        string email
+        string password_hash
+        string nom
+        string prenom
+        string telephone
+        timestamp created_at
+    }
+    
+    PROFILS_CLIENTS ||--|| USERS : complete
+    PROFILS_CLIENTS {
+        uuid id PK
+        uuid user_id FK
+        string adresse
+        string code_postal
+        string ville
+        date date_naissance
+        string lieu_naissance
+        string nationalite
+        string banque_concernee
+        decimal montant_prejudice
+    }
+    
+    DOSSIERS ||--o{ PIECES : contient
+    DOSSIERS ||--o{ DOCUMENTS : genere
+    DOSSIERS {
+        uuid id PK
+        uuid user_id FK
+        string reference
+        string statut
+        string type_contentieux
+        timestamp date_entretien
+        boolean convention_signee
+        decimal honoraires
+        timestamp created_at
+    }
+    
+    PIECES {
+        uuid id PK
+        uuid dossier_id FK
+        uuid user_id FK
+        string nom_fichier
+        string type_piece
+        string url_stockage
+        int numero_bordereau
+        boolean indexee
+        timestamp uploaded_at
+    }
+    
+    MODELES {
+        uuid id PK
+        string nom
+        string matiere
+        text contenu_template
+        jsonb zones_auto
+        jsonb zones_fixes
+        jsonb zones_libres
+        boolean actif
+    }
+    
+    DOCUMENTS ||--|| MODELES : utilise
+    DOCUMENTS {
+        uuid id PK
+        uuid dossier_id FK
+        uuid modele_id FK
+        string type_document
+        text contenu_genere
+        string statut
+        string url_pdf
+        timestamp created_at
+    }
+    
+    BORDEREAUX ||--|| DOCUMENTS : accompagne
+    BORDEREAUX {
+        uuid id PK
+        uuid document_id FK
+        jsonb liste_pieces
+        text contenu
+        timestamp generated_at
+    }
+```
+
+### Tables Principales
+
+| Table | Description |
+|-------|-------------|
+| `users` | Comptes utilisateurs (auth Supabase) |
+| `profils_clients` | Données personnelles complètes (auto-remplissage) |
+| `dossiers` | Dossiers juridiques avec statut |
+| `pieces` | Fichiers importés par les clients |
+| `modeles` | Templates de documents juridiques |
+| `documents` | Documents générés (assignations, courriers) |
+| `bordereaux` | Récapitulatifs des pièces indexées |
+
+---
+
 ## 🔍 SEO & Acquisition
 
 ### Mots-clés Cibles (Google Ads)
