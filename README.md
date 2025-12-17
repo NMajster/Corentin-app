@@ -67,11 +67,12 @@ flowchart TD
     D --> E[Création compte]
     E --> F[Paiement entretien - Stripe]
     F --> G[Confirmation + Accès espace client]
-    G --> H[Import pièces justificatives]
-    H --> I[Entretien avec avocat]
-    I --> J{Dossier recevable ?}
-    J -->|Non| K[Remboursement partiel + Conseils]
-    J -->|Oui| L[Suivi procédure dans dashboard]
+    G --> H[Entretien avec avocat]
+    H --> I{Dossier recevable ?}
+    I -->|Non| K[Conseils + Fin]
+    I -->|Oui| J[Convention honoraires signée en ligne]
+    J --> L[Import pièces justificatives]
+    L --> M[Suivi procédure dans dashboard]
 ```
 
 ---
