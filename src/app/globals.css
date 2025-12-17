@@ -1,0 +1,348 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ====================================
+   🎨 DESIGN SYSTEM - Défense des Épargnants
+   ==================================== */
+
+@theme inline {
+  /* Couleurs principales */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  
+  /* Polices */
+  --font-sans: var(--font-source-sans);
+  --font-serif: var(--font-playfair);
+  --font-mono: var(--font-geist-mono);
+  
+  /* Couleurs du thème */
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  
+  /* Composants */
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  
+  /* Charts */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  
+  /* Sidebar */
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  
+  /* Radius */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+}
+
+:root {
+  /* Radius de base */
+  --radius: 0.625rem;
+  
+  /* ====================================
+     Palette de couleurs - Thème clair
+     Inspirée du logo tricolore
+     ==================================== */
+  
+  /* Fond et texte */
+  --background: #fafaf9;           /* Blanc cassé */
+  --foreground: #1f2937;           /* Gris anthracite */
+  
+  /* Primaire - Bleu marine (confiance, sérieux juridique) */
+  --primary: #1e3a5f;
+  --primary-foreground: #ffffff;
+  
+  /* Secondaire - Argent/Gris (élégance, professionnalisme) */
+  --secondary: #f1f5f9;
+  --secondary-foreground: #1e3a5f;
+  
+  /* Accent - Rouge France (combativité, force) */
+  --accent: #c41e3a;
+  --accent-foreground: #ffffff;
+  
+  /* Muted */
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  
+  /* Destructive - Rouge foncé (urgence, alertes) */
+  --destructive: #991b1b;
+  --destructive-foreground: #ffffff;
+  
+  /* Composants */
+  --card: #ffffff;
+  --card-foreground: #1f2937;
+  --popover: #ffffff;
+  --popover-foreground: #1f2937;
+  
+  /* Bordures et inputs */
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #1e3a5f;
+  
+  /* Charts - Palette tricolore */
+  --chart-1: #1e3a5f;
+  --chart-2: #c41e3a;
+  --chart-3: #0055a4;
+  --chart-4: #c0c0c0;
+  --chart-5: #991b1b;
+  
+  /* Sidebar */
+  --sidebar: #1e3a5f;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #c41e3a;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #0055a4;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #2d5a87;
+  --sidebar-ring: #c41e3a;
+}
+
+.dark {
+  /* ====================================
+     Palette de couleurs - Thème sombre
+     ==================================== */
+  
+  --background: #0f172a;
+  --foreground: #f8fafc;
+  
+  --primary: #3b82f6;
+  --primary-foreground: #ffffff;
+  
+  --secondary: #1e293b;
+  --secondary-foreground: #f8fafc;
+  
+  --accent: #d4b84a;
+  --accent-foreground: #0f172a;
+  
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+  
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  
+  --card: #1e293b;
+  --card-foreground: #f8fafc;
+  --popover: #1e293b;
+  --popover-foreground: #f8fafc;
+  
+  --border: #334155;
+  --input: #334155;
+  --ring: #3b82f6;
+  
+  --chart-1: #3b82f6;
+  --chart-2: #d4b84a;
+  --chart-3: #60a5fa;
+  --chart-4: #fbbf24;
+  --chart-5: #ef4444;
+  
+  --sidebar: #0f172a;
+  --sidebar-foreground: #f8fafc;
+  --sidebar-primary: #d4b84a;
+  --sidebar-primary-foreground: #0f172a;
+  --sidebar-accent: #1e293b;
+  --sidebar-accent-foreground: #f8fafc;
+  --sidebar-border: #334155;
+  --sidebar-ring: #d4b84a;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  
+  /* Typographie personnalisée */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-playfair), serif;
+    @apply font-bold tracking-tight;
+  }
+  
+  p, span, a, li, label, input, textarea, button {
+    font-family: var(--font-source-sans), sans-serif;
+  }
+}
+
+/* ====================================
+   Animations personnalisées
+   ==================================== */
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse-accent {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(196, 30, 58, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 15px rgba(196, 30, 58, 0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out forwards;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.6s ease-out forwards;
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 0.6s ease-out forwards;
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.6s ease-out forwards;
+}
+
+.animate-pulse-accent {
+  animation: pulse-accent 2s infinite;
+}
+
+/* Délais d'animation pour effet de cascade */
+.animation-delay-100 { animation-delay: 100ms; }
+.animation-delay-200 { animation-delay: 200ms; }
+.animation-delay-300 { animation-delay: 300ms; }
+.animation-delay-400 { animation-delay: 400ms; }
+.animation-delay-500 { animation-delay: 500ms; }
+.animation-delay-600 { animation-delay: 600ms; }
+.animation-delay-700 { animation-delay: 700ms; }
+.animation-delay-800 { animation-delay: 800ms; }
+
+/* ====================================
+   Utilitaires personnalisés
+   ==================================== */
+
+/* Gradient de fond signature */
+.bg-gradient-hero {
+  background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 50%, #1e3a5f 100%);
+}
+
+/* Effet de brillance sur les boutons */
+.btn-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Ombre élégante pour les cartes */
+.shadow-elegant {
+  box-shadow: 
+    0 4px 6px -1px rgba(30, 58, 95, 0.1),
+    0 2px 4px -1px rgba(30, 58, 95, 0.06);
+}
+
+.shadow-elegant-lg {
+  box-shadow: 
+    0 10px 15px -3px rgba(30, 58, 95, 0.1),
+    0 4px 6px -2px rgba(30, 58, 95, 0.05);
+}
+
+/* Bordure accent */
+.border-accent-custom {
+  border-color: #c41e3a;
+}
+
+/* Texte avec gradient tricolore */
+.text-gradient {
+  background: linear-gradient(135deg, #1e3a5f 0%, #c41e3a 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Scroll smooth */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Sélection de texte avec couleur de marque */
+::selection {
+  background-color: #c41e3a;
+  color: #ffffff;
+}
