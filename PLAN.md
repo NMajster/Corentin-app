@@ -39,6 +39,8 @@ flowchart TB
         AREPORTS[Rédaction CR]
         ACAL[Calendrier Global]
         AALERTS[Centre Alertes]
+        ATEMPL[Modèles Assignations]
+        AGENERATE[Générateur Documents]
     end
 
     subgraph INFRA["☁️ Infrastructure"]
@@ -254,6 +256,178 @@ erDiagram
         boolean is_read
         string action_url
     }
+
+    DOCUMENT_TEMPLATES {
+        uuid id PK
+        string name
+        enum type "assignation|mise_en_demeure|conclusions"
+        jsonb content
+        boolean is_active
+    }
+
+    ASSIGNATIONS {
+        uuid id PK
+        uuid dossier_id FK
+        uuid template_id FK
+        string reference
+        enum status
+        jsonb filled_content
+        uuid[] selected_pieces
+        string pdf_path
+    }
+
+    DOSSIERS ||--o{ ASSIGNATIONS : "génère"
+    DOCUMENT_TEMPLATES ||--o{ ASSIGNATIONS : "utilise"
+```
+
+---
+
+## 📄 Système de Génération d'Assignations
+
+### Architecture du Générateur
+
+```mermaid
+flowchart TB
+    subgraph TEMPLATES["📄 Base de Modèles"]
+        T1[Assignation - Fraude CB]
+        T2[Assignation - Phishing]
+        T3[Assignation - Faux conseiller]
+        T4[Mise en demeure]
+        T5[Conclusions]
+    end
+
+    subgraph FIELDS["📝 Types de Champs"]
+        AUTO["🔄 Auto-remplis<br/>Client, Banque, Dates, Montants"]
+        FIXED["📌 Fixes/Standards<br/>Texte juridique type"]
+        FREE["✍️ Libres<br/>Faits, Arguments personnalisés"]
+        PIECES["📎 Pièces<br/>Documents client sélectionnés"]
+    end
+
+    subgraph BUILDER["🛠️ Éditeur d'Assignation"]
+        FORM[Formulaire structuré par sections]
+        PREVIEW[Prévisualisation temps réel]
+        PIECES_SELECT[Sélecteur de pièces avec numérotation]
+        VERSION[Historique des versions]
+    end
+
+    subgraph EXPORT["📤 Export PDF"]
+        PDF[PDF Assignation formaté]
+        BORDEREAU[Bordereau des pièces numéroté]
+        ANNEXES[Pièces jointes numérotées]
+        ZIP[Archive ZIP complète]
+    end
+
+    TEMPLATES --> BUILDER
+    FIELDS --> BUILDER
+    BUILDER --> EXPORT
+```
+
+### Types de Champs
+
+| Type | Description | Exemple |
+|------|-------------|---------|
+| `auto` | Rempli depuis la BDD | Nom client, Banque, Montant préjudice |
+| `fixed` | Texte juridique standard (modifiable) | Articles de loi, formules types |
+| `free` | Zone de rédaction libre | Les faits, arguments spécifiques |
+| `pieces` | Référence aux documents | "cf. Pièce n°3" |
+| `date` | Date formatée juridiquement | "le quinze mars deux mille vingt-quatre" |
+| `currency` | Montant formaté | "4 500,00 € (quatre mille cinq cents euros)" |
+
+### Structure d'un Modèle
+
+```
+ASSIGNATION TYPE "FRAUDE CARTE BANCAIRE"
+│
+├── Section 1: EN-TÊTE
+│   ├── [auto] Tribunal compétent
+│   ├── [auto] Identité demandeur
+│   └── [auto] Identité défendeur (banque)
+│
+├── Section 2: OBJET DE LA DEMANDE
+│   └── [fixed] Texte standard + [auto] montant
+│
+├── Section 3: LES FAITS
+│   └── [free] Rédaction avocat
+│
+├── Section 4: PIÈCES JUSTIFICATIVES
+│   └── [pieces] Sélection + numérotation auto
+│
+├── Section 5: DISCUSSION JURIDIQUE
+│   ├── [fixed] Articles L133-18 et suivants
+│   ├── [fixed] Jurisprudence type
+│   └── [free] Arguments spécifiques
+│
+└── Section 6: DEMANDES
+    ├── [fixed] Formules de condamnation
+    └── [auto] Montants calculés
+```
+
+### Workflow de Génération
+
+```mermaid
+stateDiagram-v2
+    [*] --> selection_modele: Nouveau document
+    
+    selection_modele --> edition: Modèle choisi
+    edition --> edition: Modifications
+    edition --> preview: Prévisualiser
+    preview --> edition: Corrections
+    
+    edition --> sauvegarde: Sauver brouillon
+    sauvegarde --> edition: Reprendre
+    
+    edition --> review: Soumettre validation
+    review --> edition: Corrections demandées
+    review --> approved: Validé
+    
+    approved --> export_pdf: Générer PDF
+    export_pdf --> sent: Envoyé huissier
+    sent --> delivered: Délivré
+    
+    delivered --> [*]
+```
+
+### Export PDF - Structure
+
+```
+📁 Export_Assignation_DDE-2025-0042/
+│
+├── 📄 Assignation_DDE-2025-0042.pdf
+│   └── Document principal formaté (en-tête tribunal, pagination)
+│
+├── 📄 Bordereau_pieces_DDE-2025-0042.pdf
+│   └── Liste numérotée avec description et nb pages
+│
+└── 📁 Pieces/
+    ├── 📄 Piece_01_Carte_identite.pdf
+    ├── 📄 Piece_02_Releve_bancaire_mars_2024.pdf
+    ├── 📄 Piece_03_Depot_plainte.pdf
+    ├── 📄 Piece_04_Correspondance_banque.pdf
+    └── ...
+```
+
+### Bordereau Auto-généré
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│              BORDEREAU DE COMMUNICATION DE PIÈCES                │
+│                                                                  │
+│  Affaire: DUPONT c/ BNP PARIBAS                                 │
+│  RG n°: [à compléter]                                           │
+│  Dossier: DDE-2025-0042                                         │
+│                                                                  │
+├────────┬─────────────────────────────────────────┬──────────────┤
+│ N°     │ Désignation                             │ Nb pages     │
+├────────┼─────────────────────────────────────────┼──────────────┤
+│ 1      │ Carte nationale d'identité              │ 1            │
+│ 2      │ Relevé de compte mars 2024              │ 3            │
+│ 3      │ Récépissé de dépôt de plainte           │ 2            │
+│ 4      │ Échanges SMS avec le fraudeur           │ 4            │
+│ 5      │ Courrier de réclamation à la banque     │ 1            │
+│ 6      │ Réponse de la banque du 15/04/2024      │ 2            │
+├────────┼─────────────────────────────────────────┼──────────────┤
+│        │ TOTAL                                   │ 13 pages     │
+└────────┴─────────────────────────────────────────┴──────────────┘
 ```
 
 ---
@@ -298,6 +472,8 @@ flowchart LR
         DOSSIERS2[dossiers/]
         CALENDAR2[calendrier/]
         ALERTS2[alertes/]
+        TEMPLATES2[modeles/]
+        ASSIGNATIONS2[assignations/]
     end
 
     subgraph API_ROUTES["API Routes"]
@@ -342,15 +518,22 @@ gantt
     Validation documents          :p3d, after p3c, 1d
     Rédaction comptes rendus      :p3e, after p3d, 2d
     
-    section Phase 4 - Notifications
-    Système alertes               :p4a, after p3e, 2d
-    Emails automatiques           :p4b, after p4a, 2d
-    Notifications temps réel      :p4c, after p4b, 1d
+    section Phase 4 - Générateur Documents
+    Base modèles assignations     :p4a, after p3e, 2d
+    Éditeur avec champs dynamiques:p4b, after p4a, 3d
+    Sélecteur pièces + numérotation:p4c, after p4b, 2d
+    Export PDF + Bordereau        :p4d, after p4c, 3d
+    Versioning documents          :p4e, after p4d, 1d
     
-    section Phase 5 - Polish
-    Tests & corrections           :p5a, after p4c, 3d
-    Optimisation performance      :p5b, after p5a, 2d
-    Mise en production            :p5c, after p5b, 1d
+    section Phase 5 - Notifications
+    Système alertes               :p5a, after p4e, 2d
+    Emails automatiques           :p5b, after p5a, 2d
+    Notifications temps réel      :p5c, after p5b, 1d
+    
+    section Phase 6 - Polish
+    Tests & corrections           :p6a, after p5c, 3d
+    Optimisation performance      :p6b, after p6a, 2d
+    Mise en production            :p6c, after p6b, 1d
 ```
 
 ---
@@ -388,16 +571,31 @@ gantt
 - [ ] Calendrier vue globale (tous les RDV)
 - [ ] Modification statut dossier
 
-### Phase 4 - Notifications (5 jours)
+### Phase 4 - Générateur de Documents (11 jours)
+- [ ] Tables Supabase (document_templates, assignations, assignation_versions)
+- [ ] Interface gestion des modèles d'assignation
+- [ ] Éditeur de modèles avec sections et champs typés
+- [ ] Éditeur d'assignation avec champs auto-remplis
+- [ ] Zone de rédaction libre (faits) avec éditeur Markdown
+- [ ] Sélecteur de pièces avec numérotation automatique
+- [ ] Prévisualisation temps réel du document
+- [ ] Export PDF formaté (Puppeteer ou react-pdf)
+- [ ] Génération automatique du bordereau des pièces
+- [ ] Compilation des pièces numérotées en annexe
+- [ ] Export archive ZIP complète
+- [ ] Historique des versions avec diff
+
+### Phase 5 - Notifications (5 jours)
 - [ ] Table des alertes
 - [ ] Génération automatique d'alertes
 - [ ] Centre de notifications admin
 - [ ] Emails automatiques (rappels, mises à jour)
 - [ ] Notifications temps réel (Supabase Realtime)
 
-### Phase 5 - Finalisation (6 jours)
-- [ ] Tests end-to-end parcours client
-- [ ] Tests end-to-end parcours admin
+### Phase 6 - Finalisation (6 jours)
+- [ ] Tests end-to-end parcours client complet
+- [ ] Tests end-to-end parcours admin complet
+- [ ] Tests génération documents PDF
 - [ ] Correction bugs
 - [ ] Optimisation images et assets
 - [ ] Configuration production Vercel
