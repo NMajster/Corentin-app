@@ -644,6 +644,241 @@ flowchart LR
 
 ---
 
+## 📊 Centre de Données & Observatoire des Fraudes
+
+### Architecture Data
+
+```mermaid
+flowchart TB
+    subgraph COLLECTE["📥 Collecte de Données"]
+        DOSSIERS_DATA[Données Dossiers]
+        BANQUES_DATA[Données Banques]
+        FRAUDES_DATA[Types de Fraudes]
+        PARCOURS_DATA[Parcours Clients]
+        OUTCOMES_DATA[Issues Procédures]
+    end
+
+    subgraph TRAITEMENT["⚙️ Traitement & Enrichissement"]
+        CLEAN[Nettoyage & Normalisation]
+        ANON[Anonymisation RGPD]
+        ENRICH[Enrichissement IA]
+        CATEGORIZE[Catégorisation auto]
+    end
+
+    subgraph ANALYTICS["📈 Analytics & Insights"]
+        DASHBOARD_DATA[Tableaux de bord]
+        TRENDS[Tendances & Patterns]
+        PREDICT[Prédictions]
+        ALERTS_DATA[Alertes anomalies]
+    end
+
+    subgraph OUTPUTS["📤 Valorisation"]
+        REPORTS_PUB[Rapports publics]
+        PRESS[Données presse]
+        ADVOCACY[Plaidoyer institutionnel]
+        RESEARCH[Recherche académique]
+        INTERNAL[Amélioration services]
+    end
+
+    COLLECTE --> TRAITEMENT
+    TRAITEMENT --> ANALYTICS
+    ANALYTICS --> OUTPUTS
+```
+
+### Objectifs de l'Observatoire
+
+| Objectif | Description |
+|----------|-------------|
+| **Comprendre** | Cartographier les fraudes bancaires en France |
+| **Quantifier** | Mesurer l'ampleur du phénomène par banque/type |
+| **Identifier** | Détecter les banques les plus problématiques |
+| **Prédire** | Anticiper les tendances et nouveaux types de fraudes |
+| **Alerter** | Signaler les pics d'activité frauduleuse |
+| **Plaider** | Fournir des données pour faire évoluer la législation |
+| **Communiquer** | Alimenter la presse avec des statistiques fiables |
+
+### Taxonomie des Fraudes
+
+```
+📁 Types de Fraudes
+│
+├── 💳 Fraude Carte Bancaire
+│   ├── Paiement à distance frauduleux
+│   ├── Contrefaçon de carte
+│   ├── Vol et utilisation
+│   └── Skimming
+│
+├── 📞 Fraude au Faux Conseiller
+│   ├── Appel téléphonique
+│   ├── SMS avec lien
+│   └── Email de phishing
+│
+├── 💻 Fraude en Ligne
+│   ├── Phishing bancaire
+│   ├── Malware/Keylogger
+│   ├── SIM Swap
+│   └── Compromission email
+│
+├── 📄 Fraude Documentaire
+│   ├── Fausse identité
+│   ├── Faux RIB
+│   └── Usurpation
+│
+└── 🏦 Autres
+    ├── Virement frauduleux
+    ├── Prélèvement non autorisé
+    └── Escroquerie placement
+```
+
+### Modèle de Données Analytics
+
+```mermaid
+erDiagram
+    CLIENT_ANALYTICS {
+        uuid id PK
+        uuid dossier_id FK
+        string tranche_age
+        string departement
+        string categorie_socio_pro
+        boolean premiere_fraude
+        string canal_decouverte
+    }
+
+    FRAUDE_ANALYTICS {
+        uuid id PK
+        uuid dossier_id FK
+        string type_fraude
+        string mode_operatoire
+        string canal_fraude
+        date date_fraude
+        decimal montant_initial
+        string banque_code
+    }
+
+    BANQUE_RESPONSE_ANALYTICS {
+        uuid id PK
+        uuid dossier_id FK
+        string banque_code
+        integer delai_reponse_jours
+        boolean remboursement_propose
+        string motif_refus_principal
+    }
+
+    PROCEDURE_ANALYTICS {
+        uuid id PK
+        uuid dossier_id FK
+        string issue
+        decimal montant_recupere
+        integer duree_totale_jours
+        array arguments_gagnants
+        array jurisprudence_citee
+    }
+
+    BANQUE_SCORES {
+        uuid id PK
+        string banque_code
+        string periode
+        integer nombre_dossiers
+        decimal taux_refus
+        decimal taux_succes_judiciaire
+        decimal score_global
+        integer classement
+    }
+
+    FRAUD_TRENDS {
+        uuid id PK
+        string type_trend
+        string severity
+        string title
+        string type_fraude
+        string region
+        decimal variation_pourcentage
+    }
+
+    CLIENT_ANALYTICS ||--|| FRAUDE_ANALYTICS : "subit"
+    FRAUDE_ANALYTICS ||--|| BANQUE_RESPONSE_ANALYTICS : "reçoit"
+    FRAUDE_ANALYTICS ||--|| PROCEDURE_ANALYTICS : "aboutit"
+```
+
+### Dashboard Analytique
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  📊 Observatoire des Fraudes Bancaires                    [Export 📥] [2024]│
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ┌─ VUE GLOBALE ──────────────────────────────────────────────────────────┐│
+│  │  📁 Dossiers    │  💰 Préjudice total  │  ✅ Taux succès  │  ⏱️ Durée   ││
+│  │     847        │     3.2 M€          │     76%         │   4.2 mois   ││
+│  └─────────────────────────────────────────────────────────────────────────┘│
+│                                                                             │
+│  ┌─ RÉPARTITION PAR TYPE DE FRAUDE ───────────────────────────────────────┐│
+│  │  ████████████████████░░░░░  Faux conseiller     45%  (381 dossiers)    ││
+│  │  ██████████░░░░░░░░░░░░░░░  Fraude CB           28%  (237 dossiers)    ││
+│  │  ██████░░░░░░░░░░░░░░░░░░░  Phishing            18%  (152 dossiers)    ││
+│  │  ███░░░░░░░░░░░░░░░░░░░░░░  Autres               9%  (77 dossiers)     ││
+│  └─────────────────────────────────────────────────────────────────────────┘│
+│                                                                             │
+│  ┌─ CLASSEMENT BANQUES (par nb de litiges) ───────────────────────────────┐│
+│  │  Banque              │ Dossiers │ Préjudice moy │ Taux refus │ Score   ││
+│  │  🔴 BNP Paribas      │   156    │   4 200 €    │    82%     │  2.1/5  ││
+│  │  🔴 Société Générale │   134    │   3 800 €    │    78%     │  2.3/5  ││
+│  │  🟠 Crédit Agricole  │   98     │   3 500 €    │    65%     │  2.8/5  ││
+│  │  🟡 Boursorama       │   72     │   2 900 €    │    45%     │  3.4/5  ││
+│  └─────────────────────────────────────────────────────────────────────────┘│
+│                                                                             │
+│  ┌─ INSIGHTS IA ──────────────────────────────────────────────────────────┐│
+│  │ 💡 Pic de fraudes "faux conseiller" en IDF (+34% vs N-1)               ││
+│  │ ⚠️ BNP: délai moyen de réponse passé de 15 à 28 jours                  ││
+│  │ 📈 Montant moyen en hausse: 3 200€ → 4 100€ (+28%)                     ││
+│  │ ✅ Jurisprudence Cass. 2024 citée dans 89% des victoires               ││
+│  └─────────────────────────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Rapports Générables
+
+| Rapport | Destinataire | Fréquence |
+|---------|--------------|-----------|
+| **Rapport Annuel** | Grand public, Presse | Annuel |
+| **Fiches Banques** | Clients, Prospects | Trimestriel |
+| **Alertes Tendances** | Équipe interne | Temps réel |
+| **Données Presse** | Journalistes | Sur demande |
+| **Plaidoyer AMF** | Régulateur | Annuel |
+| **Datasets Recherche** | Universitaires | Sur demande |
+
+### Conformité RGPD
+
+```mermaid
+flowchart LR
+    subgraph RAW["Données Brutes"]
+        PERSONAL[Données personnelles<br/>Nom, Email, Adresse]
+    end
+
+    subgraph PROCESS["Traitement"]
+        ANON_PROCESS[Anonymisation]
+        AGG[Agrégation]
+    end
+
+    subgraph ANALYTICS_STORE["Données Analytics"]
+        ANON_DATA[Données anonymisées<br/>Tranche âge, Département]
+        STATS[Statistiques agrégées]
+    end
+
+    RAW -->|Suppression identifiants| PROCESS
+    PROCESS --> ANALYTICS_STORE
+```
+
+| Principe RGPD | Application |
+|---------------|-------------|
+| **Minimisation** | Seules les données nécessaires à l'analyse |
+| **Anonymisation** | Pas de nom, email, adresse exacte |
+| **Agrégation** | Tranches d'âge, départements uniquement |
+| **Consentement** | Case "Participer à l'observatoire" |
+| **Opposition** | Retrait possible des données analytics |
+
+---
+
 ## 🚀 Phases de Développement
 
 ```mermaid
@@ -683,10 +918,23 @@ gantt
     Emails automatiques           :p5b, after p5a, 2d
     Notifications temps réel      :p5c, after p5b, 1d
     
-    section Phase 6 - Polish
-    Tests & corrections           :p6a, after p5c, 3d
-    Optimisation performance      :p6b, after p6a, 2d
-    Mise en production            :p6c, after p6b, 1d
+    section Phase 6 - Marketing
+    Intégration Google Ads API    :p6a, after p5c, 3d
+    Dashboard marketing           :p6b, after p6a, 2d
+    Module SEO + Blog             :p6c, after p6b, 3d
+    Tracking conversions          :p6d, after p6c, 2d
+
+    section Phase 7 - Centre de Données
+    Tables analytics              :p7a, after p6d, 2d
+    Collecte et anonymisation     :p7b, after p7a, 2d
+    Dashboard observatoire        :p7c, after p7b, 3d
+    Générateur rapports           :p7d, after p7c, 2d
+    Alertes tendances IA          :p7e, after p7d, 2d
+    
+    section Phase 8 - Polish
+    Tests & corrections           :p8a, after p7e, 3d
+    Optimisation performance      :p8b, after p8a, 2d
+    Mise en production            :p8c, after p8b, 1d
 ```
 
 ---
@@ -745,7 +993,26 @@ gantt
 - [ ] Emails automatiques (rappels, mises à jour)
 - [ ] Notifications temps réel (Supabase Realtime)
 
-### Phase 6 - Finalisation (6 jours)
+### Phase 6 - Marketing & Acquisition (10 jours)
+- [ ] Intégration Google Ads API
+- [ ] Dashboard gestion campagnes
+- [ ] Tracking conversions (gclid, UTM)
+- [ ] Module blog/articles SEO
+- [ ] Gestion meta tags dynamiques
+- [ ] Intégration Google Search Console
+- [ ] Rapports ROI par canal
+
+### Phase 7 - Centre de Données (11 jours)
+- [ ] Tables analytics (client, fraude, banque, procédure)
+- [ ] Pipeline anonymisation RGPD
+- [ ] Dashboard observatoire des fraudes
+- [ ] Classement et scoring banques
+- [ ] Générateur rapports (annuel, fiches banques)
+- [ ] Système alertes tendances
+- [ ] Export datasets anonymisés
+- [ ] Consentement et droit d'opposition
+
+### Phase 8 - Finalisation (6 jours)
 - [ ] Tests end-to-end parcours client complet
 - [ ] Tests end-to-end parcours admin complet
 - [ ] Tests génération documents PDF
