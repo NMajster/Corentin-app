@@ -6,6 +6,128 @@ Plateforme permettant aux victimes de fraude bancaire d'accéder à une assistan
 
 ---
 
+## 👥 Rôles Utilisateurs
+
+```mermaid
+flowchart TB
+    subgraph ROLES["4 Niveaux d'Accès"]
+        CLIENT["👤 CLIENT<br/>Victime de fraude"]
+        COLLAB["👥 COLLABORATEUR<br/>Assistant juridique"]
+        AVOCAT["⚖️ AVOCAT<br/>Me. Majster"]
+        ADMIN["🔐 ADMIN<br/>Super administrateur"]
+    end
+
+    subgraph PERM_CLIENT["Espace Client"]
+        C1[Dashboard personnel]
+        C2[Upload pièces]
+        C3[Prise de RDV]
+        C4[Lecture comptes rendus]
+        C5[Messagerie]
+    end
+
+    subgraph PERM_COLLAB["Espace Collaborateur"]
+        CO1[Liste clients]
+        CO2[Mener entretiens]
+        CO3[Remplir identités]
+        CO4[Résumé des faits]
+        CO5[MAJ statut dossier]
+        CO6[Valider pièces]
+        CO7[Calendrier global]
+    end
+
+    subgraph PERM_AVOCAT["Espace Avocat"]
+        A1[Tout Collaborateur +]
+        A2[Générer assignations]
+        A3[Comptes rendus]
+        A4[Valider docs juridiques]
+        A5[Modèles documents]
+    end
+
+    subgraph PERM_ADMIN["Espace Admin"]
+        AD1[Tout Avocat +]
+        AD2[Gestion utilisateurs]
+        AD3[Créer modèles]
+        AD4[Paramètres système]
+        AD5[Statistiques]
+    end
+
+    CLIENT --> PERM_CLIENT
+    COLLAB --> PERM_COLLAB
+    AVOCAT --> PERM_AVOCAT
+    ADMIN --> PERM_ADMIN
+    
+    PERM_COLLAB -.->|inclut| PERM_CLIENT
+    PERM_AVOCAT -.->|inclut| PERM_COLLAB
+    PERM_ADMIN -.->|inclut| PERM_AVOCAT
+```
+
+### Matrice des Permissions
+
+| Fonctionnalité | Client | Collaborateur | Avocat | Admin |
+|----------------|:------:|:-------------:|:------:|:-----:|
+| **ESPACE CLIENT** |
+| Dashboard personnel | ✅ | 👁️ | 👁️ | 👁️ |
+| Upload pièces | ✅ | ❌ | ❌ | ❌ |
+| Prendre RDV | ✅ | ❌ | ❌ | ❌ |
+| Lire comptes rendus | ✅ | ✅ | ✅ | ✅ |
+| Messagerie | ✅ | ✅ | ✅ | ✅ |
+| **ESPACE COLLABORATEUR** |
+| Liste tous les clients | ❌ | ✅ | ✅ | ✅ |
+| Mener entretiens | ❌ | ✅ | ✅ | ✅ |
+| Remplir identité client | ❌ | ✅ | ✅ | ✅ |
+| Remplir identité défendeur | ❌ | ✅ | ✅ | ✅ |
+| Rédiger résumé faits | ❌ | ✅ | ✅ | ✅ |
+| Mettre à jour statut | ❌ | ✅ | ✅ | ✅ |
+| Valider pièces client | ❌ | ✅ | ✅ | ✅ |
+| Calendrier global | ❌ | ✅ | ✅ | ✅ |
+| **ESPACE AVOCAT** |
+| Générer assignations | ❌ | ❌ | ✅ | ✅ |
+| Rédiger comptes rendus | ❌ | ❌ | ✅ | ✅ |
+| Valider docs juridiques | ❌ | ❌ | ✅ | ✅ |
+| Utiliser modèles | ❌ | ❌ | ✅ | ✅ |
+| **ESPACE ADMIN** |
+| Gestion utilisateurs | ❌ | ❌ | ❌ | ✅ |
+| Créer/modifier modèles | ❌ | ❌ | ❌ | ✅ |
+| Paramètres système | ❌ | ❌ | ❌ | ✅ |
+| Stats & exports globaux | ❌ | ❌ | ❌ | ✅ |
+
+👁️ = Lecture seule sur les dossiers assignés
+
+### Workflow Collaborateur Post-Entretien
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant CO as Collaborateur
+    participant SYS as Système
+    participant AV as Avocat
+
+    C->>SYS: Paiement entretien initial
+    SYS->>C: Email confirmation + création compte
+    C->>SYS: Réservation créneau RDV
+    
+    rect rgb(240, 248, 255)
+        Note over CO,C: Entretien 45 min
+        CO->>C: Conduit l'entretien
+        CO->>SYS: Remplit identité client
+        CO->>SYS: Remplit identité défendeur (banque)
+        CO->>SYS: Rédige résumé des faits
+        CO->>SYS: Met à jour statut → "RDV effectué"
+    end
+    
+    SYS->>C: Notification: RDV effectué
+    SYS->>AV: Alerte: Nouveau dossier à traiter
+    
+    AV->>SYS: Génère convention d'honoraires
+    SYS->>C: Email: Convention à signer
+    
+    C->>SYS: Upload pièces justificatives
+    CO->>SYS: Valide les pièces
+    SYS->>C: Notification: Pièces validées
+```
+
+---
+
 ## 🏗️ Architecture Globale
 
 ```mermaid
@@ -31,16 +153,25 @@ flowchart TB
         CMSG[Messages]
     end
 
-    subgraph ADMIN["⚖️ Back-Office Avocat"]
+    subgraph COLLAB["👥 Espace Collaborateur"]
+        CODASH[Dashboard Collab]
+        COENTRETIEN[Formulaire Entretien]
+        COVALIDATE[Validation Pièces]
+        COSTATUS[MAJ Statuts]
+    end
+
+    subgraph AVOCAT["⚖️ Espace Avocat"]
+        AVDASH[Dashboard Avocat]
+        AVASSIGN[Générateur Assignations]
+        AVREPORTS[Comptes Rendus]
+        AVMODELES[Modèles Documents]
+    end
+
+    subgraph ADMIN["🔐 Espace Admin"]
         ADASH[Dashboard Admin]
-        ACLIENTS[Liste Clients]
-        ADOSSIER[Gestion Dossier]
-        ADOCS[Validation Documents]
-        AREPORTS[Rédaction CR]
-        ACAL[Calendrier Global]
-        AALERTS[Centre Alertes]
-        ATEMPL[Modèles Assignations]
-        AGENERATE[Générateur Documents]
+        AUSERS[Gestion Utilisateurs]
+        ASTATS[Statistiques]
+        ASETTINGS[Paramètres]
     end
 
     subgraph INFRA["☁️ Infrastructure"]
@@ -55,19 +186,26 @@ flowchart TB
     SIGNUP -->|Email| VERIFY
     VERIFY -->|Validé| LOGIN
     LOGIN -->|Client| CDASH
-    LOGIN -->|Avocat| ADASH
+    LOGIN -->|Collaborateur| CODASH
+    LOGIN -->|Avocat| AVDASH
+    LOGIN -->|Admin| ADASH
 
     CDASH --> CPIECES
     CDASH --> CCAL
     CDASH --> CREPORTS
     CDASH --> CMSG
 
-    ADASH --> ACLIENTS
-    ACLIENTS --> ADOSSIER
-    ADOSSIER --> ADOCS
-    ADOSSIER --> AREPORTS
-    ADASH --> ACAL
-    ADASH --> AALERTS
+    CODASH --> COENTRETIEN
+    CODASH --> COVALIDATE
+    CODASH --> COSTATUS
+
+    AVDASH --> AVASSIGN
+    AVDASH --> AVREPORTS
+    AVDASH --> AVMODELES
+
+    ADASH --> AUSERS
+    ADASH --> ASTATS
+    ADASH --> ASETTINGS
 
     CLIENT <-->|API| SUPA
     ADMIN <-->|API| SUPA
@@ -172,7 +310,7 @@ erDiagram
         string email
         string full_name
         string phone
-        enum role "client|avocat|assistant|admin"
+        enum role "client|collaborateur|avocat|admin"
         timestamp created_at
     }
 
@@ -441,7 +579,9 @@ flowchart LR
         PUBLIC["(public)/"]
         AUTH["(auth)/"]
         CLIENT["(client)/"]
-        ADMIN["(admin)/"]
+        COLLAB2["(collaborateur)/"]
+        AVOCAT2["(avocat)/"]
+        ADMIN2["(admin)/"]
         API["api/"]
     end
 
@@ -466,14 +606,25 @@ flowchart LR
         MSG[messages/]
     end
 
-    subgraph ADMIN_PAGES["Back-Office"]
-        ADASH2[admin/]
-        CLIENTS2[clients/]
-        DOSSIERS2[dossiers/]
-        CALENDAR2[calendrier/]
-        ALERTS2[alertes/]
-        TEMPLATES2[modeles/]
+    subgraph COLLAB_PAGES["Espace Collaborateur"]
+        CODASH2[dashboard/]
+        ENTRETIEN[entretien/]
+        VALIDATION[validation/]
+        DOSSIERS_CO[dossiers/]
+    end
+
+    subgraph AVOCAT_PAGES["Espace Avocat"]
+        AVDASH2[dashboard/]
         ASSIGNATIONS2[assignations/]
+        RAPPORTS[rapports/]
+        MODELES[modeles/]
+    end
+
+    subgraph ADMIN_PAGES["Espace Admin"]
+        ADDASH2[dashboard/]
+        USERS[utilisateurs/]
+        STATS[statistiques/]
+        SETTINGS[parametres/]
     end
 
     subgraph API_ROUTES["API Routes"]
@@ -485,7 +636,9 @@ flowchart LR
     PUBLIC --> PUBLIC_PAGES
     AUTH --> AUTH_PAGES
     CLIENT --> CLIENT_PAGES
-    ADMIN --> ADMIN_PAGES
+    COLLAB2 --> COLLAB_PAGES
+    AVOCAT2 --> AVOCAT_PAGES
+    ADMIN2 --> ADMIN_PAGES
     API --> API_ROUTES
 ```
 
