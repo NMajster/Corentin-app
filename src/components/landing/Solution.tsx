@@ -6,7 +6,7 @@ export function Solution() {
     {
       icon: Scale,
       title: "Expertise juridique",
-      description: "Me. Nathanaël MAJSTER, avocat et ancien magistrat, avec son équipe pluridisciplinaire. Connaissance approfondie des failles des banques.",
+      description: "Nathanaël Majster, ancien magistrat ayant travaillé au sein de l'état-major d'une grande banque, connaît bien l'adversaire et le terrain judiciaire. Il s'est entouré d'une équipe à votre service.",
     },
     {
       icon: Zap,
@@ -20,8 +20,8 @@ export function Solution() {
     },
     {
       icon: FileCheck,
-      title: "Dossiers solides",
-      description: "Nous ne prenons que les dossiers avec de vraies chances de succès. 85% de taux de réussite.",
+      title: "Tous les dossiers",
+      description: "Nous prenons tous les dossiers quel que soit le préjudice. On fonce car vous méritez d'être remboursés.",
     },
   ];
 
@@ -47,10 +47,10 @@ export function Solution() {
             {/* Liste d'avantages */}
             <ul className="space-y-4 mb-8">
               {[
-                "Évaluation gratuite de votre dossier",
+                "Recueil des éléments du dossier",
                 "Tarifs transparents et maîtrisés",
-                "Espace client pour suivre l'avancement",
-                "Pas de frais en cas d'échec (honoraires de résultat)",
+                "Espace client pour suivre l'avancement du dossier et recevoir les comptes rendus à chaque étape",
+                "Prix bas grâce à l'IA, sous contrôle de l'avocat et son équipe",
               ].map((item) => (
                 <li key={item} className="flex items-start gap-3">
                   <div className="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0 mt-0.5">

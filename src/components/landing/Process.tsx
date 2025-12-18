@@ -4,7 +4,8 @@ import {
   FileText, 
   Send, 
   Gavel,
-  ArrowDown 
+  ArrowDown,
+  FileSignature
 } from "lucide-react";
 
 export function Process() {
@@ -13,29 +14,36 @@ export function Process() {
       number: "01",
       icon: MessageSquare,
       title: "Entretien initial",
-      description: "Un entretien de 30 minutes pour évaluer votre situation. Nous analysons les faits et estimons vos chances de succès.",
-      detail: "Gratuit et sans engagement",
+      description: "Un entretien de 45 minutes afin de recueillir les éléments essentiels du litige, vous expliquer vos chances de succès et engager la suite des actions à mener afin de préserver vos droits.",
+      detail: "Ne contactez pas votre banque avant cet entretien",
     },
     {
       number: "02",
+      icon: FileSignature,
+      title: "Convention d'honoraires",
+      description: "Vous recevez une proposition de convention d'honoraires avec le détail des actions ainsi financées et les frais annexes (huissier, audiencier). Ces honoraires et frais sont calculés au plus juste de vos intérêts et en fonction du préjudice.",
+      detail: "Transparence totale sur les coûts",
+    },
+    {
+      number: "03",
       icon: FileText,
       title: "Constitution du dossier",
       description: "Vous importez vos pièces via notre plateforme sécurisée. Notre système les classe automatiquement.",
       detail: "Espace client dédié",
     },
     {
-      number: "03",
+      number: "04",
       icon: Send,
       title: "Mise en demeure",
       description: "Nous envoyons une mise en demeure argumentée à votre banque. 40% des dossiers se résolvent à cette étape.",
       detail: "Délai de réponse : 15 jours",
     },
     {
-      number: "04",
+      number: "05",
       icon: Gavel,
-      title: "Assignation si nécessaire",
-      description: "En cas de refus, nous assignons la banque devant le tribunal. Vous suivez chaque étape depuis votre espace.",
-      detail: "Suivi en temps réel",
+      title: "Assignation en Justice",
+      description: "L'assignation devant le Tribunal des Affaires Économiques est l'acte de saisine du Tribunal : elle est rédigée par l'avocat et vos pièces sont annexées. La procédure est maîtrisée et vous pouvez suivre le calendrier et le compte rendu à chaque étape sur votre espace personnel.",
+      detail: "Suivi en temps réel sur votre espace",
     },
   ];
 
@@ -48,7 +56,7 @@ export function Process() {
             Comment ça marche
           </Badge>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold text-foreground mb-6">
-            4 étapes vers votre{" "}
+            5 étapes vers votre{" "}
             <span className="text-accent">remboursement</span>
           </h2>
           <p className="text-lg text-muted-foreground">
