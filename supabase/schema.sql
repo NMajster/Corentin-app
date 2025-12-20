@@ -293,6 +293,122 @@ CREATE POLICY "References juridiques are viewable by authenticated users"
 -- - Max file size : 20MB
 
 -- ===========================================
+-- Table des paiements (Stripe)
+-- ===========================================
+
+CREATE TABLE IF NOT EXISTS payments (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+    stripe_session_id VARCHAR(255) UNIQUE NOT NULL,
+    stripe_payment_intent_id VARCHAR(255),
+    stripe_customer_id VARCHAR(255),
+    amount DECIMAL(10, 2) NOT NULL,
+    currency VARCHAR(3) DEFAULT 'EUR',
+    status VARCHAR(50) DEFAULT 'pending' CHECK (status IN (
+        'pending',
+        'completed',
+        'failed',
+        'refunded'
+    )),
+    payment_type VARCHAR(50) NOT NULL CHECK (payment_type IN (
+        'entretien_initial',
+        'convention_honoraires',
+        'frais_huissier',
+        'frais_annexes'
+    )),
+    email VARCHAR(255),
+    metadata JSONB DEFAULT '{}'::JSONB,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    completed_at TIMESTAMPTZ
+);
+
+CREATE INDEX IF NOT EXISTS idx_payments_user_id ON payments(user_id);
+CREATE INDEX IF NOT EXISTS idx_payments_stripe_session ON payments(stripe_session_id);
+CREATE INDEX IF NOT EXISTS idx_payments_status ON payments(status);
+
+ALTER TABLE payments ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view own payments"
+    ON payments FOR SELECT
+    USING (auth.uid() = user_id);
+
+-- ===========================================
+-- Table des rendez-vous
+-- ===========================================
+
+CREATE TABLE IF NOT EXISTS appointments (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+    dossier_id UUID REFERENCES dossiers(id) ON DELETE SET NULL,
+    payment_id UUID REFERENCES payments(id) ON DELETE SET NULL,
+    type VARCHAR(50) NOT NULL CHECK (type IN (
+        'entretien_initial',
+        'suivi',
+        'signature_convention',
+        'autre'
+    )),
+    date_heure TIMESTAMPTZ NOT NULL,
+    duree_minutes INTEGER DEFAULT 45,
+    statut VARCHAR(50) DEFAULT 'reserve' CHECK (statut IN (
+        'reserve',
+        'confirme',
+        'realise',
+        'annule',
+        'reporte'
+    )),
+    notes TEXT,
+    lien_visio TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_appointments_user_id ON appointments(user_id);
+CREATE INDEX IF NOT EXISTS idx_appointments_date ON appointments(date_heure);
+CREATE INDEX IF NOT EXISTS idx_appointments_statut ON appointments(statut);
+
+CREATE TRIGGER update_appointments_updated_at
+    BEFORE UPDATE ON appointments
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+ALTER TABLE appointments ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view own appointments"
+    ON appointments FOR SELECT
+    USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own appointments"
+    ON appointments FOR INSERT
+    WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own appointments"
+    ON appointments FOR UPDATE
+    USING (auth.uid() = user_id);
+
+-- ===========================================
+-- Table des créneaux disponibles (gérée par admin)
+-- ===========================================
+
+CREATE TABLE IF NOT EXISTS available_slots (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    date_heure TIMESTAMPTZ NOT NULL UNIQUE,
+    duree_minutes INTEGER DEFAULT 45,
+    disponible BOOLEAN DEFAULT TRUE,
+    created_by UUID REFERENCES auth.users(id),
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_available_slots_date ON available_slots(date_heure);
+CREATE INDEX IF NOT EXISTS idx_available_slots_disponible ON available_slots(disponible);
+
+ALTER TABLE available_slots ENABLE ROW LEVEL SECURITY;
+
+-- Tout le monde peut voir les créneaux disponibles
+CREATE POLICY "Anyone can view available slots"
+    ON available_slots FOR SELECT
+    TO authenticated
+    USING (disponible = TRUE);
+
+-- ===========================================
 -- Données de test (optionnel)
 -- ===========================================
 
