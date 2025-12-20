@@ -9,46 +9,46 @@ export function Pricing() {
       name: "Consultation initiale",
       price: "90€",
       priceDetail: "TTC",
-      description: "Premier entretien pour évaluer votre dossier",
+      description: "Entretien de 45 minutes pour évaluer votre dossier",
       features: [
-        "Entretien de 45 minutes",
-        "Analyse complète de votre situation",
-        "Estimation des chances de succès",
-        "Conseils personnalisés",
-        "Devis détaillé si suite donnée",
+        "Entretien en visioconférence (45 min)",
+        "Recueil des éléments d'information du dossier",
+        "Examen des documents en possession du client",
+        "Avis juridique sur les chances de succès",
+        "Analyse des étapes à venir",
       ],
       cta: "Prendre RDV",
       popular: false,
     },
     {
       name: "Accompagnement Complet",
-      price: "990€",
-      priceDetail: "+ honoraires de résultat",
-      description: "Prise en charge complète de votre dossier",
+      price: "1 500€",
+      priceDetail: "ou 3 000€",
+      description: "Forfait selon le montant du préjudice",
       features: [
-        "Entretien approfondi (1h)",
-        "Constitution complète du dossier",
-        "Rédaction mise en demeure",
-        "Assignation si nécessaire",
-        "Suivi via espace client",
-        "Représentation au tribunal",
-        "Pas de frais si échec*",
+        "1 500€ si préjudice < 25 000€",
+        "3 000€ si préjudice > 25 000€",
+        "Courriers et mises en demeure",
+        "Conseils juridiques tout au long de la procédure",
+        "Accès à la plateforme client",
+        "Assignation et plaidoirie incluses",
+        "Suivi jusqu'à la fin de la première instance",
       ],
-      cta: "Démarrer mon dossier",
+      cta: "Prendre rendez-vous",
       popular: true,
     },
     {
       name: "Conseil Ponctuel",
-      price: "150€",
-      priceDetail: "/ heure",
-      description: "Consultation pour des questions précises",
+      price: "90€",
+      priceDetail: "TTC",
+      description: "Entretien vidéo en cours de dossier",
       features: [
-        "Consultation juridique",
-        "Analyse de documents",
+        "Entretien en visioconférence",
+        "Point sur l'avancement du dossier",
+        "Réponses à vos questions",
         "Conseils stratégiques",
-        "Compte-rendu écrit",
       ],
-      cta: "Réserver une consultation",
+      cta: "Réserver un entretien",
       popular: false,
     },
   ];
@@ -135,18 +135,18 @@ export function Pricing() {
           ))}
         </div>
 
-        {/* Note honoraires de résultat */}
+        {/* Note convention d'honoraires */}
         <div className="max-w-2xl mx-auto bg-muted/50 rounded-xl p-6 border border-border">
           <div className="flex items-start gap-4">
             <Info className="w-6 h-6 text-primary flex-shrink-0 mt-0.5" />
             <div>
               <h4 className="font-semibold text-foreground mb-2">
-                * Honoraires de résultat
+                Convention d&apos;honoraires
               </h4>
               <p className="text-sm text-muted-foreground">
-                En plus des frais fixes, nous appliquons un honoraire de résultat de <strong>15%</strong> uniquement 
-                en cas de succès (remboursement obtenu). Si votre dossier n&apos;aboutit pas, vous ne payez que les 
-                frais fixes. C&apos;est notre engagement de confiance.
+                Le détail des prestations et le montant exact du forfait seront consignés dans une 
+                <strong> convention d&apos;honoraires</strong> que vous signerez avant le début de la procédure. 
+                Ce document garantit une transparence totale sur les frais engagés.
               </p>
             </div>
           </div>

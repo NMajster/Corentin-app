@@ -409,6 +409,47 @@ CREATE POLICY "Anyone can view available slots"
     USING (disponible = TRUE);
 
 -- ===========================================
+-- Table des documents clients (fichiers uploadés)
+-- ===========================================
+
+CREATE TABLE IF NOT EXISTS client_documents (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+    email VARCHAR(255),
+    file_name VARCHAR(255) NOT NULL,
+    file_type VARCHAR(100),
+    file_size INTEGER,
+    file_path TEXT NOT NULL,
+    designation VARCHAR(255),
+    date_piece DATE,
+    commentaire TEXT,
+    dossier_id UUID REFERENCES dossiers(id) ON DELETE SET NULL,
+    uploaded_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_client_documents_user_id ON client_documents(user_id);
+CREATE INDEX IF NOT EXISTS idx_client_documents_email ON client_documents(email);
+CREATE INDEX IF NOT EXISTS idx_client_documents_dossier_id ON client_documents(dossier_id);
+
+ALTER TABLE client_documents ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view own client_documents"
+    ON client_documents FOR SELECT
+    USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own client_documents"
+    ON client_documents FOR INSERT
+    WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own client_documents"
+    ON client_documents FOR UPDATE
+    USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete own client_documents"
+    ON client_documents FOR DELETE
+    USING (auth.uid() = user_id);
+
+-- ===========================================
 -- Données de test (optionnel)
 -- ===========================================
 

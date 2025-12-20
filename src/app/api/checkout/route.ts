@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
         nom: nom || "",
         type: "entretien_initial",
       },
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/rendez-vous/confirmation?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/rendez-vous/calendrier?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/rendez-vous/paiement?canceled=true`,
     });
 

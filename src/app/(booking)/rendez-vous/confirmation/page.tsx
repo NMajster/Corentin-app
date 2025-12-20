@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -11,52 +12,63 @@ import {
   Calendar,
   Clock,
   Video,
-  Phone,
   Mail,
-  Download,
   CalendarPlus,
+  Loader2,
 } from "lucide-react";
 
-export default function ConfirmationPage() {
+function ConfirmationContent() {
   const searchParams = useSearchParams();
   
-  const dateParam = searchParams.get("date");
-  const timeParam = searchParams.get("time");
-  const typeParam = searchParams.get("type") as "visio" | "telephone" | null;
   const emailParam = searchParams.get("email");
+  const nameParam = searchParams.get("name");
+  const dateParam = searchParams.get("date");
+  const booked = searchParams.get("booked");
 
-  if (!dateParam || !timeParam || !typeParam) {
-    return null;
+  // Si pas de paramètres, afficher un message générique
+  const hasBooking = booked === "true";
+
+  // Parser la date si disponible
+  let formattedDate = "";
+  let formattedTime = "";
+  if (dateParam) {
+    try {
+      const date = new Date(dateParam);
+      formattedDate = date.toLocaleDateString("fr-FR", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
+      formattedTime = date.toLocaleTimeString("fr-FR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch {
+      // Ignorer les erreurs de parsing
+    }
   }
 
-  const selectedDate = new Date(dateParam);
-
-  const formatFullDate = (date: Date) => {
-    return date.toLocaleDateString("fr-FR", {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
-  };
-
-  // Générer le lien calendrier (Google Calendar)
+  // Générer le lien Google Calendar
   const generateCalendarLink = () => {
-    const startDate = new Date(selectedDate);
-    const [hours, minutes] = timeParam.split(":");
-    startDate.setHours(parseInt(hours), parseInt(minutes), 0);
+    if (!dateParam) return "#";
     
-    const endDate = new Date(startDate);
-    endDate.setMinutes(endDate.getMinutes() + 45);
+    try {
+      const startDate = new Date(dateParam);
+      const endDate = new Date(startDate);
+      endDate.setMinutes(endDate.getMinutes() + 45);
 
-    const formatDate = (d: Date) => d.toISOString().replace(/-|:|\.\d+/g, "");
+      const formatDate = (d: Date) => d.toISOString().replace(/-|:|\.\d+/g, "");
 
-    const title = encodeURIComponent("Consultation - Défense des Épargnants");
-    const details = encodeURIComponent(
-      `Consultation initiale avec Me. Nathanaël MAJSTER\n\nType: ${typeParam === "visio" ? "Visioconférence" : "Téléphone"}\nDurée: 45 minutes\n\nPrésentez votre situation de fraude bancaire.`
-    );
+      const title = encodeURIComponent("Consultation - Défense des Épargnants");
+      const details = encodeURIComponent(
+        `Consultation initiale avec Me. Nathanaël MAJSTER\n\nDurée: 45 minutes\n\nPrésentez votre situation de fraude bancaire.`
+      );
 
-    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${formatDate(startDate)}/${formatDate(endDate)}&details=${details}`;
+      return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${formatDate(startDate)}/${formatDate(endDate)}&details=${details}`;
+    } catch {
+      return "#";
+    }
   };
 
   return (
@@ -85,11 +97,13 @@ export default function ConfirmationPage() {
             <CheckCircle className="w-12 h-12 text-green-600" />
           </div>
           <h1 className="text-3xl font-serif font-bold text-foreground mb-2">
-            Rendez-vous confirmé !
+            {hasBooking ? "Rendez-vous confirmé !" : "Paiement confirmé !"}
           </h1>
-          <p className="text-muted-foreground">
-            Un email de confirmation a été envoyé à <strong>{emailParam}</strong>
-          </p>
+          {emailParam && (
+            <p className="text-muted-foreground">
+              Un email de confirmation a été envoyé à <strong>{emailParam}</strong>
+            </p>
+          )}
         </div>
 
         {/* Détails du RDV */}
@@ -100,39 +114,49 @@ export default function ConfirmationPage() {
             </h2>
 
             <div className="space-y-4">
-              <div className="flex items-center gap-4 p-4 bg-muted/50 rounded-xl">
-                <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
-                  <Calendar className="w-6 h-6 text-primary" />
+              {nameParam && (
+                <div className="flex items-center gap-4 p-4 bg-muted/50 rounded-xl">
+                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+                    <Mail className="w-6 h-6 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Client</p>
+                    <p className="font-semibold">{nameParam}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Date</p>
-                  <p className="font-semibold capitalize">{formatFullDate(selectedDate)}</p>
+              )}
+
+              {formattedDate && (
+                <div className="flex items-center gap-4 p-4 bg-muted/50 rounded-xl">
+                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+                    <Calendar className="w-6 h-6 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Date</p>
+                    <p className="font-semibold capitalize">{formattedDate}</p>
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {formattedTime && (
+                <div className="flex items-center gap-4 p-4 bg-muted/50 rounded-xl">
+                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+                    <Clock className="w-6 h-6 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Heure</p>
+                    <p className="font-semibold">{formattedTime} - 45 minutes</p>
+                  </div>
+                </div>
+              )}
 
               <div className="flex items-center gap-4 p-4 bg-muted/50 rounded-xl">
                 <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
-                  <Clock className="w-6 h-6 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Heure</p>
-                  <p className="font-semibold">{timeParam} - 45 minutes</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4 p-4 bg-muted/50 rounded-xl">
-                <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
-                  {typeParam === "visio" ? (
-                    <Video className="w-6 h-6 text-primary" />
-                  ) : (
-                    <Phone className="w-6 h-6 text-primary" />
-                  )}
+                  <Video className="w-6 h-6 text-primary" />
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Type de consultation</p>
-                  <p className="font-semibold">
-                    {typeParam === "visio" ? "Visioconférence" : "Appel téléphonique"}
-                  </p>
+                  <p className="font-semibold">Visioconférence ou téléphone</p>
                 </div>
               </div>
             </div>
@@ -147,18 +171,31 @@ export default function ConfirmationPage() {
         </Card>
 
         {/* Actions */}
-        <div className="grid sm:grid-cols-2 gap-4 mb-8">
-          <a href={generateCalendarLink()} target="_blank" rel="noopener noreferrer">
-            <Button variant="outline" className="w-full h-14">
-              <CalendarPlus className="w-5 h-5 mr-2" />
-              Ajouter au calendrier
-            </Button>
-          </a>
-          <Button variant="outline" className="w-full h-14">
-            <Download className="w-5 h-5 mr-2" />
-            Télécharger le récapitulatif
-          </Button>
-        </div>
+        {formattedDate && (
+          <div className="grid sm:grid-cols-2 gap-4 mb-8">
+            <a href={generateCalendarLink()} target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" className="w-full h-14">
+                <CalendarPlus className="w-5 h-5 mr-2" />
+                Ajouter au calendrier
+              </Button>
+            </a>
+            <Link href="/dashboard">
+              <Button className="w-full h-14">
+                Accéder à mon espace
+              </Button>
+            </Link>
+          </div>
+        )}
+
+        {!formattedDate && (
+          <div className="mb-8">
+            <Link href="/dashboard">
+              <Button className="w-full h-14">
+                Accéder à mon espace
+              </Button>
+            </Link>
+          </div>
+        )}
 
         {/* Info prochaines étapes */}
         <Card className="bg-primary text-white">
@@ -170,10 +207,7 @@ export default function ConfirmationPage() {
               <li className="flex items-start gap-3">
                 <Badge className="bg-white/20 text-white mt-0.5">1</Badge>
                 <span>
-                  {typeParam === "visio" 
-                    ? "Vous recevrez un lien de visioconférence par email 1h avant le rendez-vous"
-                    : "Nous vous appellerons au numéro indiqué à l'heure du rendez-vous"
-                  }
+                  Vous recevrez un lien de visioconférence par email avant le rendez-vous
                 </span>
               </li>
               <li className="flex items-start gap-3">
@@ -205,3 +239,14 @@ export default function ConfirmationPage() {
   );
 }
 
+export default function ConfirmationPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-muted/30 flex items-center justify-center">
+        <Loader2 className="w-12 h-12 text-primary animate-spin" />
+      </div>
+    }>
+      <ConfirmationContent />
+    </Suspense>
+  );
+}

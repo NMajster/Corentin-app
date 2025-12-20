@@ -4,6 +4,43 @@
 
 ---
 
+## 🔴 POINT D'ARRÊT - 20 Décembre 2024 (soir)
+
+### Problème en cours :
+Les documents importés dans Supabase Storage ne s'affichent pas dans `/dashboard/pieces`.
+
+### Découverte du debug (`/api/debug-storage`) :
+```json
+{
+  "supabaseUrl": "https://cisbbjujhmugpnypfvbt.s...",
+  "buckets": ["client-documents"],
+  "rootFiles": [
+    {"name": "documents", "id": null},
+    {"name": "nmajster_yahoo_fr", "id": null}
+  ],
+  "folderContents": {
+    "documents": [{"name": "nmajster_yahoo_fr", "id": null}]
+  }
+}
+```
+
+### Cause probable :
+- Les fichiers sont dans le dossier `nmajster_yahoo_fr` 
+- L'API retourne `id: null` pour ces items
+- Le code ignore les items avec `id: null` (pense que ce sont des dossiers)
+- Il faut explorer plus profondément la structure
+
+### Prochaines étapes :
+1. Aller dans **Supabase Dashboard > Storage > client-documents** pour voir la vraie structure des fichiers
+2. Modifier le code de `pieces/page.tsx` pour chercher dans le bon chemin
+3. Ou modifier `/api/debug-storage` pour explorer plus en profondeur
+
+### Fichiers modifiés cette session :
+- `src/app/(client)/dashboard/pieces/page.tsx` - ajout console.log de débogage
+- `src/app/api/debug-storage/route.ts` - créé pour tester Supabase Storage
+
+---
+
 ## 🎯 Résumé du Projet
 
 Plateforme juridique permettant aux victimes de fraude bancaire d'accéder à une assistance juridique professionnelle. Stack : Next.js 16 + React 19 + Supabase + Stripe.
