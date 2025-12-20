@@ -360,5 +360,3 @@ export type Bordereau = Tables<"bordereaux">;
 export type ReferenceJuridique = Tables<"references_juridiques">;
 
 
-
-

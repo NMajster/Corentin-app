@@ -1,20 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Scale } from "lucide-react";
+import { Menu, X } from "lucide-react";
 
 export function Header() {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navLinks = [
     { href: "#probleme", label: "Le Problème" },
@@ -25,89 +17,76 @@ export function Header() {
   ];
 
   return (
-    <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled
-          ? "bg-white/95 backdrop-blur-md shadow-elegant"
-          : "bg-transparent"
-      }`}
-    >
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-20 items-center justify-between">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-border shadow-sm">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-36 lg:h-44">
           {/* Logo */}
-          <a href="#" className="flex items-center gap-3 group">
-            <div className={`p-2 rounded-lg transition-colors ${isScrolled ? 'bg-primary' : 'bg-white/10 backdrop-blur-sm'}`}>
-              <Scale className={`h-6 w-6 ${isScrolled ? 'text-white' : 'text-white'}`} />
-            </div>
-            <div className="flex flex-col">
-              <span className={`text-lg font-serif font-bold tracking-tight transition-colors ${isScrolled ? 'text-primary' : 'text-white'}`}>
-                Défense des Épargnants
-              </span>
-              <span className={`text-xs transition-colors ${isScrolled ? 'text-muted-foreground' : 'text-white/70'}`}>
-                Cabinet d&apos;Avocat
-              </span>
-            </div>
+          <a href="/" className="flex items-center group">
+            <Image
+              src="/logo.png"
+              alt="Défense des Épargnants"
+              width={400}
+              height={160}
+              className="h-32 lg:h-40 w-auto drop-shadow-md"
+              priority
+            />
           </a>
 
-          {/* Navigation Desktop */}
+          {/* Navigation desktop */}
           <nav className="hidden lg:flex items-center gap-8">
             {navLinks.map((link) => (
               <a
                 key={link.href}
                 href={link.href}
-                className={`text-sm font-medium transition-colors hover:text-accent ${
-                  isScrolled ? "text-foreground" : "text-white/90 hover:text-white"
-                }`}
+                className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
               >
                 {link.label}
               </a>
             ))}
           </nav>
 
-          {/* CTA Desktop */}
+          {/* CTA desktop */}
           <div className="hidden lg:flex items-center gap-4">
-            <Button
-              asChild
-              className="bg-accent hover:bg-accent/90 text-primary font-semibold px-6 animate-pulse-gold"
-            >
-              <a href="#contact">Prendre RDV</a>
+            <Button variant="ghost" size="sm">
+              Se connecter
+            </Button>
+            <Button size="sm" className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold">
+              Prendre RDV
             </Button>
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* Menu mobile toggle */}
           <button
-            className="lg:hidden p-2"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="lg:hidden p-2 text-primary"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-label="Menu"
           >
-            {isMobileMenuOpen ? (
-              <X className={`h-6 w-6 ${isScrolled ? 'text-foreground' : 'text-white'}`} />
-            ) : (
-              <Menu className={`h-6 w-6 ${isScrolled ? 'text-foreground' : 'text-white'}`} />
-            )}
+            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
 
-        {/* Mobile Menu */}
-        {isMobileMenuOpen && (
-          <div className="lg:hidden bg-white rounded-xl shadow-elegant-lg mt-2 p-4 animate-fade-in">
-            <nav className="flex flex-col gap-4">
+        {/* Menu mobile */}
+        {isMenuOpen && (
+          <div className="lg:hidden py-4 border-t border-border animate-fade-in">
+            <nav className="flex flex-col gap-2">
               {navLinks.map((link) => (
                 <a
                   key={link.href}
                   href={link.href}
-                  className="text-foreground font-medium py-2 hover:text-accent transition-colors"
-                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-primary hover:bg-muted rounded-lg transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
                 >
                   {link.label}
                 </a>
               ))}
-              <Button
-                asChild
-                className="bg-accent hover:bg-accent/90 text-primary font-semibold mt-2"
-              >
-                <a href="#contact">Prendre RDV</a>
-              </Button>
+              <div className="flex flex-col gap-2 mt-4 px-4">
+                <Button variant="outline" size="sm" className="w-full">
+                  Se connecter
+                </Button>
+                <Button size="sm" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground">
+                  Prendre RDV
+                </Button>
+              </div>
             </nav>
           </div>
         )}
@@ -115,4 +94,3 @@ export function Header() {
     </header>
   );
 }
-
