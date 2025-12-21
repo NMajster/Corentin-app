@@ -59,9 +59,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Générer un nom de fichier unique
+    // Utiliser le même format que les fichiers existants
     const timestamp = Date.now();
     const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
-    const filePath = `${user.id}/${timestamp}-${safeName}`;
+    const userEmail = user.email?.replace(/[@.]/g, "_") || user.id;
+    const filePath = `documents/${userEmail}/dashboard-upload/${timestamp}_${safeName}`;
 
     // Upload vers Supabase Storage
     const arrayBuffer = await file.arrayBuffer();
