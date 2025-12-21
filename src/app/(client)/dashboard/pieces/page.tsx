@@ -61,94 +61,57 @@ export default function PiecesPage() {
   const [saving, setSaving] = useState(false);
   const supabase = createClient();
 
-  // Charger les documents depuis le Storage
+  // Charger les documents depuis le Storage (exploration récursive)
   useEffect(() => {
     const fetchDocuments = async () => {
-      console.log("🔍 Début chargement documents...");
-      
       if (!supabase) {
-        console.log("❌ Supabase non configuré");
         setLoading(false);
         return;
       }
       
       const { data: { user } } = await supabase.auth.getUser();
-      console.log("👤 User:", user?.email, user?.id);
       
       if (!user) {
-        console.log("❌ Pas d'utilisateur connecté");
         setLoading(false);
         return;
       }
 
       const allFiles: Document[] = [];
 
-      // D'abord, lister tous les dossiers à la racine du bucket
-      console.log("📂 Listing des dossiers racine...");
-      const { data: rootFolders, error: rootError } = await supabase.storage
-        .from("client-documents")
-        .list("", { limit: 100 });
-      
-      console.log("📂 Dossiers racine:", rootFolders, "Erreur:", rootError);
-
-      if (rootFolders) {
-        for (const folder of rootFolders) {
-          // Si c'est un dossier (pas de metadata = dossier)
-          if (folder.name) {
-            console.log(`📁 Exploration du dossier: ${folder.name}`);
+      // Fonction récursive pour explorer tous les niveaux
+      async function exploreFolder(path: string, depth: number) {
+        if (depth > 5) return; // Max 5 niveaux de profondeur
+        
+        const { data: items } = await supabase.storage
+          .from("client-documents")
+          .list(path, { limit: 100 });
+        
+        if (items) {
+          for (const item of items) {
+            const fullPath = path ? `${path}/${item.name}` : item.name;
             
-            const { data: subFiles, error: subError } = await supabase.storage
-              .from("client-documents")
-              .list(folder.name, { limit: 100 });
-            
-            console.log(`  └─ Fichiers dans ${folder.name}:`, subFiles?.length, "Erreur:", subError);
-            
-            if (subFiles) {
-              for (const file of subFiles) {
-                // Vérifier si c'est un fichier (a un id) et pas un sous-dossier
-                if (file.id) {
-                  console.log(`    └─ Fichier trouvé: ${file.name}`);
-                  allFiles.push({
-                    id: file.id,
-                    file_name: file.name.replace(/^\d+_/, ""),
-                    file_type: file.metadata?.mimetype || "application/octet-stream",
-                    file_size: file.metadata?.size || 0,
-                    file_path: `${folder.name}/${file.name}`,
-                    uploaded_at: file.created_at || new Date().toISOString(),
-                  });
-                } else {
-                  // C'est un sous-dossier, explorer aussi
-                  console.log(`  📁 Sous-dossier trouvé: ${folder.name}/${file.name}`);
-                  const { data: deepFiles } = await supabase.storage
-                    .from("client-documents")
-                    .list(`${folder.name}/${file.name}`, { limit: 100 });
-                  
-                  if (deepFiles) {
-                    for (const deepFile of deepFiles) {
-                      if (deepFile.id) {
-                        console.log(`      └─ Fichier profond: ${deepFile.name}`);
-                        allFiles.push({
-                          id: deepFile.id,
-                          file_name: deepFile.name.replace(/^\d+_/, ""),
-                          file_type: deepFile.metadata?.mimetype || "application/octet-stream",
-                          file_size: deepFile.metadata?.size || 0,
-                          file_path: `${folder.name}/${file.name}/${deepFile.name}`,
-                          uploaded_at: deepFile.created_at || new Date().toISOString(),
-                        });
-                      }
-                    }
-                  }
-                }
-              }
+            // Si c'est un fichier (a un id et metadata)
+            if (item.id && item.metadata) {
+              allFiles.push({
+                id: item.id,
+                file_name: item.name.replace(/^\d+_/, ""), // Enlever le timestamp
+                file_type: item.metadata?.mimetype || "application/octet-stream",
+                file_size: item.metadata?.size || 0,
+                file_path: fullPath,
+                uploaded_at: item.created_at || new Date().toISOString(),
+              });
+            } else if (item.name) {
+              // C'est un dossier, explorer récursivement
+              await exploreFolder(fullPath, depth + 1);
             }
           }
         }
       }
+      
+      // Explorer depuis la racine
+      await exploreFolder("", 0);
 
-      console.log("✅ Total fichiers trouvés:", allFiles.length);
-      console.log("📄 Fichiers:", allFiles);
-
-      // Dédupliquer
+      // Dédupliquer par chemin
       const uniqueDocs = allFiles.filter((doc, index, self) => 
         index === self.findIndex(d => d.file_path === doc.file_path)
       );

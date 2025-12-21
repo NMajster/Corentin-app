@@ -23,18 +23,48 @@ export async function GET() {
     .from("client-documents")
     .list("", { limit: 100 });
 
-  // Explorer chaque dossier
-  const folderContents: Record<string, unknown[]> = {};
+  // Explorer TOUS les niveaux (3 niveaux de profondeur)
+  const allFiles: { path: string; file: unknown }[] = [];
   
-  if (rootFiles) {
-    for (const item of rootFiles) {
-      const { data: subFiles } = await supabase.storage
-        .from("client-documents")
-        .list(item.name, { limit: 100 });
-      
-      if (subFiles && subFiles.length > 0) {
-        folderContents[item.name] = subFiles;
+  // Fonction récursive pour explorer
+  async function exploreFolder(path: string, depth: number) {
+    if (depth > 3) return; // Max 3 niveaux
+    
+    const { data: items } = await supabase.storage
+      .from("client-documents")
+      .list(path, { limit: 100 });
+    
+    if (items) {
+      for (const item of items) {
+        const fullPath = path ? `${path}/${item.name}` : item.name;
+        
+        // Si c'est un fichier (a un id et metadata)
+        if (item.id && item.metadata) {
+          allFiles.push({ path: fullPath, file: item });
+        } else {
+          // C'est un dossier, explorer récursivement
+          await exploreFolder(fullPath, depth + 1);
+        }
       }
+    }
+  }
+  
+  await exploreFolder("", 0);
+
+  // Explorer aussi spécifiquement les chemins connus
+  const knownPaths = [
+    "nmajster_yahoo_fr",
+    "documents",
+    "documents/nmajster_yahoo_fr",
+  ];
+  
+  const knownPathsContents: Record<string, unknown[]> = {};
+  for (const kp of knownPaths) {
+    const { data } = await supabase.storage
+      .from("client-documents")
+      .list(kp, { limit: 100 });
+    if (data && data.length > 0) {
+      knownPathsContents[kp] = data;
     }
   }
 
@@ -44,7 +74,9 @@ export async function GET() {
     bucketsError: bucketsError?.message,
     rootFiles,
     rootError: rootError?.message,
-    folderContents,
+    allFilesFound: allFiles.length,
+    allFiles,
+    knownPathsContents,
   }, { status: 200 });
 }
 

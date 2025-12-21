@@ -113,13 +113,35 @@ export default function DashboardPage() {
         setDossier(dossierData);
       }
 
-      // Compter les documents
-      const { count: docsCount } = await supabase
-        .from("client_documents")
-        .select("*", { count: "exact", head: true })
-        .eq("user_id", authUser.id);
+      // Compter les documents dans le Storage (exploration récursive)
+      let totalDocs = 0;
       
-      setDocumentsCount(docsCount || 0);
+      async function countFilesInFolder(path: string, depth: number): Promise<number> {
+        if (depth > 5) return 0;
+        
+        let count = 0;
+        const { data: items } = await supabase.storage
+          .from("client-documents")
+          .list(path, { limit: 100 });
+        
+        if (items) {
+          for (const item of items) {
+            const fullPath = path ? `${path}/${item.name}` : item.name;
+            
+            if (item.id && item.metadata) {
+              // C'est un fichier
+              count++;
+            } else if (item.name) {
+              // C'est un dossier, explorer récursivement
+              count += await countFilesInFolder(fullPath, depth + 1);
+            }
+          }
+        }
+        return count;
+      }
+      
+      totalDocs = await countFilesInFolder("", 0);
+      setDocumentsCount(totalDocs);
 
       setLoading(false);
     }

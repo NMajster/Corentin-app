@@ -18,130 +18,76 @@ export function Hero() {
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-primary/50" />
       </div>
 
-      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-32">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Contenu textuel */}
-          <div className="text-center lg:text-left">
-            {/* Badge */}
-            <div className="animate-fade-in">
-              <Badge 
-                variant="outline" 
-                className="mb-6 border-accent/50 bg-accent/10 text-white px-4 py-1.5 text-sm"
-              >
-                <Shield className="w-4 h-4 mr-2" />
-                Cabinet spécialisé contentieux bancaire
-              </Badge>
-            </div>
+      <div className="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-32">
+        {/* Contenu textuel - pleine largeur */}
+        <div className="text-center">
+          {/* Badge */}
+          <div className="animate-fade-in">
+            <Badge 
+              variant="outline" 
+              className="mb-6 border-accent/50 bg-accent/10 text-white px-4 py-1.5 text-sm"
+            >
+              <Shield className="w-4 h-4 mr-2" />
+              Cabinet spécialisé contentieux bancaire
+            </Badge>
+          </div>
 
-            {/* Titre principal */}
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif font-bold text-white leading-tight mb-6">
-              Victime de fraude bancaire ?{" "}
-              <span className="text-accent">Votre banque refuse de rembourser ?</span>
-            </h1>
+          {/* Titre principal */}
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-serif font-bold text-white leading-tight mb-6">
+            Victime de fraude bancaire ?{" "}
+            <span className="text-accent block mt-2">Votre banque refuse de rembourser ?</span>
+          </h1>
 
-            {/* Sous-titre */}
-            <p className="text-xl text-white/80 mb-4 max-w-xl mx-auto lg:mx-0">
-              <strong className="text-white">Nous les assignons.</strong>
-            </p>
-            
-            <p className="text-lg text-white/70 mb-8 max-w-xl mx-auto lg:mx-0">
-              Cabinet d&apos;avocat spécialisé dans la défense des victimes de fraudes au faux conseiller. 
-              Tarifs maîtrisés grâce à notre process optimisé.
-            </p>
+          {/* Sous-titre */}
+          <p className="text-2xl text-white/80 mb-4">
+            <strong className="text-white">Nous les assignons.</strong>
+          </p>
+          
+          <p className="text-lg text-white/70 mb-10 max-w-2xl mx-auto">
+            Cabinet d&apos;avocat spécialisé dans la défense des victimes de fraudes au faux conseiller. 
+            Tarifs maîtrisés grâce à notre process optimisé.
+          </p>
 
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <div className="flex flex-col items-center">
               <Button
                 asChild
                 size="lg"
                 className="bg-accent hover:bg-accent/90 text-primary font-bold text-lg px-8 py-6"
               >
                 <a href="/rendez-vous">
-                  Prendre RDV (90€)
+                  Prendre rendez-vous
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </a>
               </Button>
-              <Button
-                asChild
-                size="lg"
-                variant="outline"
-                className="border-white/30 bg-white/10 text-white hover:bg-white/20 font-semibold text-lg px-8 py-6"
-              >
-                <a href="#processus">Comment ça marche ?</a>
-              </Button>
+              <span className="text-white/50 text-sm mt-2 font-light">
+                Entretien préliminaire : 90€
+              </span>
             </div>
-
-            {/* Stats rapides */}
-            <div className="mt-12 grid grid-cols-3 gap-6 max-w-lg mx-auto lg:mx-0">
-              <div className="text-center lg:text-left">
-                <p className="text-3xl font-serif font-bold text-accent">85%</p>
-                <p className="text-sm text-white/70">Taux de succès</p>
-              </div>
-              <div className="text-center lg:text-left">
-                <p className="text-3xl font-serif font-bold text-accent">-40%</p>
-                <p className="text-sm text-white/70">Coûts réduits</p>
-              </div>
-              <div className="text-center lg:text-left">
-                <p className="text-3xl font-serif font-bold text-accent">500+</p>
-                <p className="text-sm text-white/70">Dossiers traités</p>
-              </div>
-            </div>
+            <Button
+              asChild
+              size="lg"
+              variant="outline"
+              className="border-white/30 bg-white/10 text-white hover:bg-white/20 font-semibold text-lg px-8 py-6"
+            >
+              <a href="#processus">Comment ça marche ?</a>
+            </Button>
           </div>
 
-          {/* Bloc visuel - Les 3 piliers */}
-          <div className="hidden lg:block">
-            <div className="relative">
-              {/* Carte principale */}
-              <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
-                <h3 className="text-xl font-serif font-bold text-white mb-6">
-                  Nos 3 piliers
-                </h3>
-                
-                <div className="space-y-6">
-                  {/* Expertise */}
-                  <div className="flex items-start gap-4 p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors">
-                    <div className="p-3 rounded-lg bg-accent/20">
-                      <Shield className="h-6 w-6 text-accent" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-white mb-1">Expertise</h4>
-                      <p className="text-sm text-white/70">
-                        Ancien magistrat, spécialiste du contentieux bancaire
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Efficacité */}
-                  <div className="flex items-start gap-4 p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors">
-                    <div className="p-3 rounded-lg bg-accent/20">
-                      <Clock className="h-6 w-6 text-accent" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-white mb-1">Efficacité</h4>
-                      <p className="text-sm text-white/70">
-                        Process automatisé = coûts réduits de 40%
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Combativité */}
-                  <div className="flex items-start gap-4 p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors">
-                    <div className="p-3 rounded-lg bg-accent/20">
-                      <TrendingUp className="h-6 w-6 text-accent" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-white mb-1">Combativité</h4>
-                      <p className="text-sm text-white/70">
-                        85% de succès sur les dossiers acceptés
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Élément décoratif */}
-              <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-accent/20 rounded-full blur-2xl" />
-              <div className="absolute -top-4 -left-4 w-32 h-32 bg-white/5 rounded-full blur-3xl" />
+          {/* Stats rapides */}
+          <div className="mt-16 grid grid-cols-3 gap-8 max-w-xl mx-auto">
+            <div className="text-center">
+              <p className="text-4xl font-serif font-bold text-accent">85%</p>
+              <p className="text-sm text-white/70">Taux de succès</p>
+            </div>
+            <div className="text-center">
+              <p className="text-4xl font-serif font-bold text-accent">-40%</p>
+              <p className="text-sm text-white/70">Coûts réduits</p>
+            </div>
+            <div className="text-center">
+              <p className="text-4xl font-serif font-bold text-accent">500+</p>
+              <p className="text-sm text-white/70">Dossiers traités</p>
             </div>
           </div>
         </div>
