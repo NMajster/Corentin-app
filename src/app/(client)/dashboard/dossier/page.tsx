@@ -1,8 +1,21 @@
+"use client";
+
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   FileText,
   User,
@@ -10,41 +23,60 @@ import {
   Calendar,
   Euro,
   CheckCircle,
-  AlertTriangle,
   Download,
   ExternalLink,
   Phone,
   Mail,
   FolderOpen,
   ArrowRight,
+  Plus,
+  Upload,
+  Trash2,
+  Edit3,
+  Save,
+  X,
+  MapPin,
+  CreditCard,
 } from "lucide-react";
 import Link from "next/link";
 
+// Types de fraudes bancaires
+const typesFraude = [
+  { value: "faux_conseiller", label: "Fraude au faux conseiller bancaire" },
+  { value: "phishing", label: "Phishing / Hameçonnage" },
+  { value: "virement_frauduleux", label: "Virement frauduleux" },
+  { value: "usurpation_identite", label: "Usurpation d'identité bancaire" },
+  { value: "fraude_cb", label: "Fraude à la carte bancaire" },
+  { value: "faux_rib", label: "Fraude au faux RIB" },
+  { value: "arnaque_placement", label: "Arnaque au placement financier" },
+  { value: "autre", label: "Autre" },
+];
+
+interface Victime {
+  id: string;
+  nom: string;
+  prenom: string;
+  email: string;
+  telephone: string;
+  adresse: string;
+  codePostal: string;
+  ville: string;
+  dateNaissance: string;
+  lieuNaissance: string;
+  pieceIdentite: string | null;
+}
+
+interface Banque {
+  nom: string;
+  siegeSocial: string;
+  adresseAgence: string;
+  datePremiereOperation: string;
+}
+
 export default function DossierPage() {
-  // Données de démonstration - à connecter avec Supabase
-  const dossier = {
-    reference: "DOS-20241217-abc123",
-    dateCreation: "17 décembre 2024",
-    typeContentieux: "Fraude au faux conseiller",
-  };
-
-  const client = {
-    nom: "Dupont",
-    prenom: "Jean",
-    email: "jean.dupont@email.fr",
-    telephone: "06 12 34 56 78",
-    adresse: "123 Rue de Paris",
-    codePostal: "75001",
-    ville: "Paris",
-    dateNaissance: "15/03/1980",
-    lieuNaissance: "Lyon",
-  };
-
-  const affaire = {
-    banque: "Société Générale",
-    montantPrejudice: 5500,
-    dateIncident: "15 novembre 2024",
-    descriptionFaits: `Le 15 novembre 2024, j'ai reçu un appel téléphonique d'une personne se présentant comme conseiller de la Société Générale. 
+  // États pour l'édition
+  const [isEditingFaits, setIsEditingFaits] = useState(false);
+  const [descriptionFaits, setDescriptionFaits] = useState(`Le 15 novembre 2024, j'ai reçu un appel téléphonique d'une personne se présentant comme conseiller de la Société Générale. 
     
 Cette personne connaissait mon nom, mon adresse et mon numéro de compte. Elle m'a alerté sur des mouvements suspects sur mon compte et m'a demandé de valider des opérations pour "sécuriser" mon compte.
 
@@ -52,8 +84,40 @@ Sous la pression et la panique, j'ai validé via l'application mobile trois vire
 
 Après avoir raccroché, j'ai contacté ma vraie agence qui m'a confirmé qu'il s'agissait d'une fraude. J'ai immédiatement fait opposition et déposé plainte.
 
-La banque refuse de me rembourser en invoquant ma "négligence grave".`,
-  };
+La banque refuse de me rembourser en invoquant ma "négligence grave".`);
+  const [tempDescription, setTempDescription] = useState(descriptionFaits);
+
+  // Données de démonstration - à connecter avec Supabase
+  const [dossier, setDossier] = useState({
+    reference: "DOS-20241217-abc123",
+    dateCreation: "17 décembre 2024",
+    typeContentieux: "faux_conseiller",
+  });
+
+  const [victimes, setVictimes] = useState<Victime[]>([
+    {
+      id: "1",
+      nom: "Dupont",
+      prenom: "Jean",
+      email: "jean.dupont@email.fr",
+      telephone: "06 12 34 56 78",
+      adresse: "123 Rue de Paris",
+      codePostal: "75001",
+      ville: "Paris",
+      dateNaissance: "15/03/1980",
+      lieuNaissance: "Lyon",
+      pieceIdentite: null,
+    },
+  ]);
+
+  const [banque, setBanque] = useState<Banque>({
+    nom: "Société Générale",
+    siegeSocial: "29 Boulevard Haussmann, 75009 Paris",
+    adresseAgence: "15 Rue de la République, 75001 Paris",
+    datePremiereOperation: "15 novembre 2024",
+  });
+
+  const [montantPrejudice] = useState(5500);
 
   const documents = [
     {
@@ -67,10 +131,54 @@ La banque refuse de me rembourser en invoquant ma "négligence grave".`,
   // Nombre de pièces importées (à connecter avec Supabase Storage)
   const piecesImportees = 10;
 
-  // Prochaine étape définie par l'avocat (sera éditable depuis le back-office)
+  // Prochaine étape définie par l'avocat
   const prochaineEtape = {
     titre: "Constitution du dossier",
     description: "Nous analysons vos pièces et préparons la stratégie.",
+  };
+
+  // Fonctions
+  const ajouterVictime = () => {
+    const newVictime: Victime = {
+      id: Date.now().toString(),
+      nom: "",
+      prenom: "",
+      email: "",
+      telephone: "",
+      adresse: "",
+      codePostal: "",
+      ville: "",
+      dateNaissance: "",
+      lieuNaissance: "",
+      pieceIdentite: null,
+    };
+    setVictimes([...victimes, newVictime]);
+  };
+
+  const supprimerVictime = (id: string) => {
+    if (victimes.length > 1) {
+      setVictimes(victimes.filter((v) => v.id !== id));
+    }
+  };
+
+  const updateVictime = (id: string, field: keyof Victime, value: string) => {
+    setVictimes(
+      victimes.map((v) => (v.id === id ? { ...v, [field]: value } : v))
+    );
+  };
+
+  const handleSaveDescription = () => {
+    setDescriptionFaits(tempDescription);
+    setIsEditingFaits(false);
+  };
+
+  const handleCancelEdit = () => {
+    setTempDescription(descriptionFaits);
+    setIsEditingFaits(false);
+  };
+
+  const getTypeFraudeLabel = (value: string) => {
+    return typesFraude.find((t) => t.value === value)?.label || value;
   };
 
   return (
@@ -104,8 +212,12 @@ La banque refuse de me rembourser en invoquant ma "négligence grave".`,
                   <FolderOpen className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Pièces importées</p>
-                  <p className="text-2xl font-bold text-foreground">{piecesImportees}</p>
+                  <p className="text-sm text-muted-foreground">
+                    Pièces importées
+                  </p>
+                  <p className="text-2xl font-bold text-foreground">
+                    {piecesImportees}
+                  </p>
                 </div>
               </div>
               <Link href="/dashboard/pieces">
@@ -125,9 +237,15 @@ La banque refuse de me rembourser en invoquant ma "négligence grave".`,
                 <ArrowRight className="w-6 h-6 text-emerald-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground mb-1">Prochaine étape</p>
-                <p className="font-semibold text-foreground">{prochaineEtape.titre}</p>
-                <p className="text-sm text-muted-foreground mt-1">{prochaineEtape.description}</p>
+                <p className="text-sm text-muted-foreground mb-1">
+                  Prochaine étape
+                </p>
+                <p className="font-semibold text-foreground">
+                  {prochaineEtape.titre}
+                </p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {prochaineEtape.description}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -135,121 +253,381 @@ La banque refuse de me rembourser en invoquant ma "négligence grave".`,
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="infos" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 lg:w-auto lg:inline-grid">
-          <TabsTrigger value="infos">Informations</TabsTrigger>
+      <Tabs defaultValue="victimes" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid">
+          <TabsTrigger value="victimes">Victimes</TabsTrigger>
+          <TabsTrigger value="affaire">L&apos;affaire</TabsTrigger>
           <TabsTrigger value="documents">Documents</TabsTrigger>
           <TabsTrigger value="historique">Historique</TabsTrigger>
         </TabsList>
 
-        {/* Tab Informations */}
-        <TabsContent value="infos" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Informations client */}
-            <Card>
+        {/* Tab Victimes */}
+        <TabsContent value="victimes" className="space-y-6">
+          {victimes.map((victime, index) => (
+            <Card key={victime.id}>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 font-serif">
-                  <User className="w-5 h-5 text-primary" />
-                  Vos informations
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2 font-serif">
+                    <User className="w-5 h-5 text-primary" />
+                    {victimes.length > 1
+                      ? `Victime ${index + 1}`
+                      : "Vos informations"}
+                    {victime.nom && victime.prenom && (
+                      <span className="font-normal text-muted-foreground ml-2">
+                        - {victime.prenom} {victime.nom}
+                      </span>
+                    )}
+                  </CardTitle>
+                  {victimes.length > 1 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                      onClick={() => supprimerVictime(victime.id)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Nom</p>
-                    <p className="font-medium">{client.nom}</p>
+              <CardContent className="space-y-6">
+                {/* Informations personnelles */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor={`nom-${victime.id}`}>Nom</Label>
+                    <Input
+                      id={`nom-${victime.id}`}
+                      value={victime.nom}
+                      onChange={(e) =>
+                        updateVictime(victime.id, "nom", e.target.value)
+                      }
+                      placeholder="Nom de famille"
+                    />
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Prénom</p>
-                    <p className="font-medium">{client.prenom}</p>
-                  </div>
-                </div>
-                <Separator />
-                <div className="flex items-center gap-3">
-                  <Mail className="w-4 h-4 text-muted-foreground" />
-                  <span>{client.email}</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Phone className="w-4 h-4 text-muted-foreground" />
-                  <span>{client.telephone}</span>
-                </div>
-                <Separator />
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Adresse</p>
-                  <p>{client.adresse}</p>
-                  <p>{client.codePostal} {client.ville}</p>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Date de naissance</p>
-                    <p className="font-medium">{client.dateNaissance}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Lieu de naissance</p>
-                    <p className="font-medium">{client.lieuNaissance}</p>
+                  <div className="space-y-2">
+                    <Label htmlFor={`prenom-${victime.id}`}>Prénom</Label>
+                    <Input
+                      id={`prenom-${victime.id}`}
+                      value={victime.prenom}
+                      onChange={(e) =>
+                        updateVictime(victime.id, "prenom", e.target.value)
+                      }
+                      placeholder="Prénom"
+                    />
                   </div>
                 </div>
-                <Link href="/dashboard/profil">
-                  <Button variant="link" className="p-0 h-auto text-primary">
-                    Modifier mes informations →
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
 
-            {/* Informations affaire */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 font-serif">
-                  <Building2 className="w-5 h-5 text-primary" />
-                  L&apos;affaire
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Type de contentieux</p>
-                  <Badge className="mt-1 bg-primary/10 text-primary">
-                    {dossier.typeContentieux}
-                  </Badge>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor={`email-${victime.id}`}>Email</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        id={`email-${victime.id}`}
+                        type="email"
+                        className="pl-10"
+                        value={victime.email}
+                        onChange={(e) =>
+                          updateVictime(victime.id, "email", e.target.value)
+                        }
+                        placeholder="email@exemple.fr"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor={`telephone-${victime.id}`}>Téléphone</Label>
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        id={`telephone-${victime.id}`}
+                        className="pl-10"
+                        value={victime.telephone}
+                        onChange={(e) =>
+                          updateVictime(victime.id, "telephone", e.target.value)
+                        }
+                        placeholder="06 12 34 56 78"
+                      />
+                    </div>
+                  </div>
                 </div>
+
                 <Separator />
-                <div className="flex items-center gap-3">
-                  <Building2 className="w-4 h-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">Banque concernée</p>
-                    <p className="font-medium">{affaire.banque}</p>
+
+                <div className="space-y-2">
+                  <Label htmlFor={`adresse-${victime.id}`}>Adresse</Label>
+                  <Input
+                    id={`adresse-${victime.id}`}
+                    value={victime.adresse}
+                    onChange={(e) =>
+                      updateVictime(victime.id, "adresse", e.target.value)
+                    }
+                    placeholder="Numéro et nom de rue"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor={`cp-${victime.id}`}>Code postal</Label>
+                    <Input
+                      id={`cp-${victime.id}`}
+                      value={victime.codePostal}
+                      onChange={(e) =>
+                        updateVictime(victime.id, "codePostal", e.target.value)
+                      }
+                      placeholder="75001"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor={`ville-${victime.id}`}>Ville</Label>
+                    <Input
+                      id={`ville-${victime.id}`}
+                      value={victime.ville}
+                      onChange={(e) =>
+                        updateVictime(victime.id, "ville", e.target.value)
+                      }
+                      placeholder="Paris"
+                    />
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <Euro className="w-4 h-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">Montant du préjudice</p>
-                    <p className="font-medium text-lg">{affaire.montantPrejudice.toLocaleString('fr-FR')} €</p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor={`ddn-${victime.id}`}>Date de naissance</Label>
+                    <Input
+                      id={`ddn-${victime.id}`}
+                      type="date"
+                      value={victime.dateNaissance}
+                      onChange={(e) =>
+                        updateVictime(victime.id, "dateNaissance", e.target.value)
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor={`ldn-${victime.id}`}>Lieu de naissance</Label>
+                    <Input
+                      id={`ldn-${victime.id}`}
+                      value={victime.lieuNaissance}
+                      onChange={(e) =>
+                        updateVictime(victime.id, "lieuNaissance", e.target.value)
+                      }
+                      placeholder="Ville de naissance"
+                    />
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <Calendar className="w-4 h-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">Date de l&apos;incident</p>
-                    <p className="font-medium">{affaire.dateIncident}</p>
-                  </div>
+
+                <Separator />
+
+                {/* Pièce d'identité */}
+                <div className="space-y-3">
+                  <Label className="flex items-center gap-2">
+                    <CreditCard className="w-4 h-4" />
+                    Pièce d&apos;identité
+                  </Label>
+                  {victime.pieceIdentite ? (
+                    <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <CheckCircle className="w-5 h-5 text-green-600" />
+                        <span className="text-sm text-green-700">
+                          Pièce d&apos;identité importée
+                        </span>
+                      </div>
+                      <Button variant="ghost" size="sm" className="text-red-500">
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center hover:border-primary/50 transition-colors">
+                      <Upload className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
+                      <p className="text-sm text-muted-foreground mb-2">
+                        Carte d&apos;identité ou passeport (recto/verso)
+                      </p>
+                      <Button variant="outline" size="sm">
+                        <Upload className="w-4 h-4 mr-2" />
+                        Importer
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
-          </div>
+          ))}
+
+          {/* Bouton ajouter victime */}
+          <Button
+            variant="outline"
+            className="w-full border-dashed border-2"
+            onClick={ajouterVictime}
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Ajouter une autre victime
+          </Button>
+        </TabsContent>
+
+        {/* Tab Affaire */}
+        <TabsContent value="affaire" className="space-y-6">
+          {/* Type de contentieux */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="font-serif">Type de contentieux</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Select
+                value={dossier.typeContentieux}
+                onValueChange={(value) =>
+                  setDossier({ ...dossier, typeContentieux: value })
+                }
+              >
+                <SelectTrigger className="w-full md:w-96">
+                  <SelectValue placeholder="Sélectionnez le type de fraude" />
+                </SelectTrigger>
+                <SelectContent>
+                  {typesFraude.map((type) => (
+                    <SelectItem key={type.value} value={type.value}>
+                      {type.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </CardContent>
+          </Card>
+
+          {/* Informations banque (défendeur) */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 font-serif">
+                <Building2 className="w-5 h-5 text-primary" />
+                Le défendeur (Banque)
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="banque-nom">Nom de la banque</Label>
+                <Input
+                  id="banque-nom"
+                  value={banque.nom}
+                  onChange={(e) => setBanque({ ...banque, nom: e.target.value })}
+                  placeholder="Ex: Société Générale, BNP Paribas..."
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="banque-siege" className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4" />
+                  Adresse du siège social
+                </Label>
+                <Input
+                  id="banque-siege"
+                  value={banque.siegeSocial}
+                  onChange={(e) =>
+                    setBanque({ ...banque, siegeSocial: e.target.value })
+                  }
+                  placeholder="Adresse complète du siège"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="banque-agence" className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4" />
+                  Adresse de l&apos;agence concernée
+                </Label>
+                <Input
+                  id="banque-agence"
+                  value={banque.adresseAgence}
+                  onChange={(e) =>
+                    setBanque({ ...banque, adresseAgence: e.target.value })
+                  }
+                  placeholder="Adresse de votre agence"
+                />
+              </div>
+
+              <Separator />
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="date-premiere-op"
+                    className="flex items-center gap-2"
+                  >
+                    <Calendar className="w-4 h-4" />
+                    Date de la 1ère opération frauduleuse
+                  </Label>
+                  <Input
+                    id="date-premiere-op"
+                    type="date"
+                    value={banque.datePremiereOperation}
+                    onChange={(e) =>
+                      setBanque({
+                        ...banque,
+                        datePremiereOperation: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2">
+                    <Euro className="w-4 h-4" />
+                    Montant total du préjudice
+                  </Label>
+                  <div className="text-2xl font-bold text-foreground">
+                    {montantPrejudice.toLocaleString("fr-FR")} €
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Description des faits */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 font-serif">
-                <FileText className="w-5 h-5 text-primary" />
-                Description des faits
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2 font-serif">
+                  <FileText className="w-5 h-5 text-primary" />
+                  Description des faits
+                </CardTitle>
+                {!isEditingFaits ? (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setIsEditingFaits(true)}
+                  >
+                    <Edit3 className="w-4 h-4 mr-2" />
+                    Modifier
+                  </Button>
+                ) : (
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleCancelEdit}
+                    >
+                      <X className="w-4 h-4 mr-1" />
+                      Annuler
+                    </Button>
+                    <Button size="sm" onClick={handleSaveDescription}>
+                      <Save className="w-4 h-4 mr-2" />
+                      Enregistrer
+                    </Button>
+                  </div>
+                )}
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="prose prose-sm max-w-none text-muted-foreground whitespace-pre-line">
-                {affaire.descriptionFaits}
-              </div>
+              {isEditingFaits ? (
+                <Textarea
+                  value={tempDescription}
+                  onChange={(e) => setTempDescription(e.target.value)}
+                  className="min-h-[300px] font-mono text-sm"
+                  placeholder="Décrivez les faits de manière chronologique et détaillée..."
+                />
+              ) : (
+                <div className="prose prose-sm max-w-none text-muted-foreground whitespace-pre-line">
+                  {descriptionFaits}
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground mt-4">
+                💡 Vous pouvez modifier cette description à tout moment pour
+                ajouter des détails ou corriger des informations.
+              </p>
             </CardContent>
           </Card>
         </TabsContent>
@@ -263,7 +641,7 @@ La banque refuse de me rembourser en invoquant ma "négligence grave".`,
             <CardContent>
               <div className="space-y-4">
                 {documents.map((doc, index) => (
-                  <div 
+                  <div
                     key={index}
                     className="flex items-center justify-between p-4 bg-muted/50 rounded-lg"
                   >
@@ -274,12 +652,14 @@ La banque refuse de me rembourser en invoquant ma "négligence grave".`,
                       <div>
                         <p className="font-medium">{doc.nom}</p>
                         {doc.date && (
-                          <p className="text-sm text-muted-foreground">{doc.date}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {doc.date}
+                          </p>
                         )}
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
-                      {doc.statut === "signe" ? (
+                      {doc.statut === "signe" && (
                         <>
                           <Badge className="bg-green-100 text-green-700">
                             <CheckCircle className="w-3 h-3 mr-1" />
@@ -289,11 +669,6 @@ La banque refuse de me rembourser en invoquant ma "négligence grave".`,
                             <Download className="w-4 h-4" />
                           </Button>
                         </>
-                      ) : (
-                        <Badge variant="outline" className="text-amber-600 border-amber-200">
-                          <Clock className="w-3 h-3 mr-1" />
-                          En attente
-                        </Badge>
                       )}
                     </div>
                   </div>
@@ -304,9 +679,12 @@ La banque refuse de me rembourser en invoquant ma "négligence grave".`,
                 <div className="flex items-start gap-3">
                   <FileText className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
                   <div>
-                    <p className="font-medium text-foreground">Documents à venir</p>
+                    <p className="font-medium text-foreground">
+                      Documents à venir
+                    </p>
                     <p className="text-sm text-muted-foreground">
-                      Les documents de procédure seront ajoutés ici au fur et à mesure de l&apos;avancement de votre dossier.
+                      Les documents de procédure seront ajoutés ici au fur et à
+                      mesure de l&apos;avancement de votre dossier.
                     </p>
                   </div>
                 </div>
@@ -324,17 +702,37 @@ La banque refuse de me rembourser en invoquant ma "négligence grave".`,
             <CardContent>
               <div className="space-y-6">
                 {[
-                  { date: "18 déc. 2024 - 15:30", action: "Convention d'honoraires signée", type: "success" },
-                  { date: "18 déc. 2024 - 14:00", action: "Entretien téléphonique réalisé", type: "success" },
-                  { date: "17 déc. 2024 - 10:15", action: "3 pièces importées", type: "info" },
-                  { date: "17 déc. 2024 - 09:30", action: "Dossier créé", type: "info" },
+                  {
+                    date: "18 déc. 2024 - 15:30",
+                    action: "Convention d'honoraires signée",
+                    type: "success",
+                  },
+                  {
+                    date: "18 déc. 2024 - 14:00",
+                    action: "Entretien téléphonique réalisé",
+                    type: "success",
+                  },
+                  {
+                    date: "17 déc. 2024 - 10:15",
+                    action: "3 pièces importées",
+                    type: "info",
+                  },
+                  {
+                    date: "17 déc. 2024 - 09:30",
+                    action: "Dossier créé",
+                    type: "info",
+                  },
                 ].map((event, index) => (
                   <div key={index} className="flex gap-4">
-                    <div className={`w-2 h-2 rounded-full mt-2 ${
-                      event.type === "success" ? "bg-green-500" : "bg-primary"
-                    }`} />
+                    <div
+                      className={`w-2 h-2 rounded-full mt-2 ${
+                        event.type === "success" ? "bg-green-500" : "bg-primary"
+                      }`}
+                    />
                     <div>
-                      <p className="text-sm text-muted-foreground">{event.date}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {event.date}
+                      </p>
                       <p className="font-medium">{event.action}</p>
                     </div>
                   </div>
@@ -364,7 +762,10 @@ La banque refuse de me rembourser en invoquant ma "négligence grave".`,
                   Envoyer un message
                 </Button>
               </Link>
-              <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">
+              <Button
+                variant="outline"
+                className="border-white/30 text-white hover:bg-white/10"
+              >
                 <ExternalLink className="w-4 h-4 mr-2" />
                 Planifier un appel
               </Button>
@@ -375,5 +776,3 @@ La banque refuse de me rembourser en invoquant ma "négligence grave".`,
     </div>
   );
 }
-
-
