@@ -89,10 +89,25 @@ La banque refuse de me rembourser en invoquant ma "négligence grave".`);
 
   // Données de démonstration - à connecter avec Supabase
   const [dossier, setDossier] = useState({
-    reference: "DOS-20241217-abc123",
     dateCreation: "17 décembre 2024",
+    datePaiement: "2024-12-17", // Date du paiement des 90€
+    numeroDossier: 1, // Numéro séquentiel du jour
     typeContentieux: "faux_conseiller",
   });
+
+  // Génération de la référence : Nom C/ Banque - AAAA-JJMM-NNN
+  const genererReference = () => {
+    const nomPlaignant = victimes[0]?.nom?.toUpperCase() || "PLAIGNANT";
+    const nomBanque = banque.nom?.toUpperCase() || "BANQUE";
+    const date = new Date(dossier.datePaiement);
+    const annee = date.getFullYear();
+    const jour = String(date.getDate()).padStart(2, "0");
+    const mois = String(date.getMonth() + 1).padStart(2, "0");
+    const numero = String(dossier.numeroDossier).padStart(3, "0");
+    return `${nomPlaignant} C/ ${nomBanque} - ${annee}-${jour}${mois}-${numero}`;
+  };
+
+  const reference = genererReference();
 
   const [victimes, setVictimes] = useState<Victime[]>([
     {
@@ -189,8 +204,8 @@ La banque refuse de me rembourser en invoquant ma "négligence grave".`);
           <h1 className="text-3xl font-serif font-bold text-foreground mb-2">
             Mon dossier
           </h1>
-          <p className="text-muted-foreground">
-            Référence : {dossier.reference}
+          <p className="text-muted-foreground font-medium">
+            {reference}
           </p>
         </div>
         <div className="flex gap-3">
