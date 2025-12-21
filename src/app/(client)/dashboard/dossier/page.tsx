@@ -254,11 +254,35 @@ La banque refuse de me rembourser en invoquant ma "négligence grave".`);
 
       {/* Tabs */}
       <Tabs defaultValue="victimes" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid">
-          <TabsTrigger value="victimes">Victimes</TabsTrigger>
-          <TabsTrigger value="affaire">L&apos;affaire</TabsTrigger>
-          <TabsTrigger value="documents">Documents</TabsTrigger>
-          <TabsTrigger value="historique">Historique</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid bg-transparent gap-2 p-1">
+          <TabsTrigger 
+            value="victimes"
+            className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700 data-[state=inactive]:bg-blue-50 data-[state=inactive]:text-blue-600 hover:bg-blue-100 rounded-lg font-medium transition-all"
+          >
+            <User className="w-4 h-4 mr-2" />
+            Victimes
+          </TabsTrigger>
+          <TabsTrigger 
+            value="affaire"
+            className="data-[state=active]:bg-amber-100 data-[state=active]:text-amber-700 data-[state=inactive]:bg-amber-50 data-[state=inactive]:text-amber-600 hover:bg-amber-100 rounded-lg font-medium transition-all"
+          >
+            <Building2 className="w-4 h-4 mr-2" />
+            L&apos;affaire
+          </TabsTrigger>
+          <TabsTrigger 
+            value="documents"
+            className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700 data-[state=inactive]:bg-emerald-50 data-[state=inactive]:text-emerald-600 hover:bg-emerald-100 rounded-lg font-medium transition-all"
+          >
+            <FileText className="w-4 h-4 mr-2" />
+            Documents
+          </TabsTrigger>
+          <TabsTrigger 
+            value="historique"
+            className="data-[state=active]:bg-purple-100 data-[state=active]:text-purple-700 data-[state=inactive]:bg-purple-50 data-[state=inactive]:text-purple-600 hover:bg-purple-100 rounded-lg font-medium transition-all"
+          >
+            <Calendar className="w-4 h-4 mr-2" />
+            Historique
+          </TabsTrigger>
         </TabsList>
 
         {/* Tab Victimes */}
