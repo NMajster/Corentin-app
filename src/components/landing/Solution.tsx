@@ -26,7 +26,7 @@ export function Solution() {
   ];
 
   return (
-    <section id="solution" className="py-20 lg:py-32 bg-white">
+    <section id="solution" className="py-16 lg:py-24 bg-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           {/* Texte */}
@@ -39,18 +39,18 @@ export function Solution() {
               <span className="text-gradient">rapport de force</span>
             </h2>
             <p className="text-lg text-muted-foreground mb-8">
-              Grâce à notre <strong>process innovant</strong>, nous rendons accessibles des procédures 
-              qui étaient auparavant réservées aux gros dossiers. Vous bénéficiez de l&apos;expertise 
-              d&apos;un cabinet spécialisé à un tarif compatible avec votre préjudice.
+              Un préjudice de 7 000€ ne valait pas une action en justice. Les banques le savaient 
+              et en profitaient. <strong>Notre technologie a changé l&apos;équation</strong> : nous défendons 
+              tous les dossiers, quel que soit le montant. Ça, les banques ne vont pas aimer.
             </p>
 
             {/* Liste d'avantages */}
             <ul className="space-y-4 mb-8">
               {[
-                "Recueil des éléments du dossier",
-                "Tarifs transparents et maîtrisés",
-                "Espace client pour suivre l'avancement du dossier et recevoir les comptes rendus à chaque étape",
-                "Prix bas grâce à l'IA, sous contrôle de l'avocat et son équipe",
+                "Recueil des éléments d'information",
+                "Importation des pièces et des preuves",
+                "Discussion sur la marche à suivre",
+                "Application du plan d'attaque",
               ].map((item) => (
                 <li key={item} className="flex items-start gap-3">
                   <div className="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0 mt-0.5">

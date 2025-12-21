@@ -6,7 +6,7 @@ import { Check, Star, ArrowRight, Info } from "lucide-react";
 export function Pricing() {
   const plans = [
     {
-      name: "Consultation initiale",
+      name: "Entretien préliminaire",
       price: "90€",
       priceDetail: "TTC",
       description: "Entretien de 45 minutes pour évaluer votre dossier",
@@ -28,33 +28,19 @@ export function Pricing() {
       features: [
         "1 500€ si préjudice < 25 000€",
         "3 000€ si préjudice > 25 000€",
-        "Courriers et mises en demeure",
-        "Conseils juridiques tout au long de la procédure",
-        "Accès à la plateforme client",
+        "Suivi personnalisé tout au long de la procédure",
+        "Accès temps réel à l'avancement et comptes rendus",
+        "Entretiens avec l'avocat sur demande",
+        "Une équipe dédiée : avocat, juristes et experts",
         "Assignation et plaidoirie incluses",
-        "Suivi jusqu'à la fin de la première instance",
       ],
       cta: "Prendre rendez-vous",
       popular: true,
     },
-    {
-      name: "Conseil Ponctuel",
-      price: "90€",
-      priceDetail: "TTC",
-      description: "Entretien vidéo en cours de dossier",
-      features: [
-        "Entretien en visioconférence",
-        "Point sur l'avancement du dossier",
-        "Réponses à vos questions",
-        "Conseils stratégiques",
-      ],
-      cta: "Réserver un entretien",
-      popular: false,
-    },
   ];
 
   return (
-    <section id="tarifs" className="py-20 lg:py-32 bg-white">
+    <section id="tarifs" className="py-16 lg:py-24 bg-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="max-w-3xl mx-auto text-center mb-16">
@@ -71,7 +57,7 @@ export function Pricing() {
         </div>
 
         {/* Plans */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-12">
           {plans.map((plan) => (
             <Card 
               key={plan.name}

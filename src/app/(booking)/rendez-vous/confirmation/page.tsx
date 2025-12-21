@@ -170,56 +170,73 @@ function ConfirmationContent() {
           </CardContent>
         </Card>
 
-        {/* Actions */}
+        {/* Ajouter au calendrier si date disponible */}
         {formattedDate && (
-          <div className="grid sm:grid-cols-2 gap-4 mb-8">
+          <div className="mb-6">
             <a href={generateCalendarLink()} target="_blank" rel="noopener noreferrer">
-              <Button variant="outline" className="w-full h-14">
+              <Button variant="outline" className="w-full h-12">
                 <CalendarPlus className="w-5 h-5 mr-2" />
                 Ajouter au calendrier
               </Button>
             </a>
-            <Link href="/dashboard">
-              <Button className="w-full h-14">
-                Accéder à mon espace
-              </Button>
-            </Link>
           </div>
         )}
 
-        {!formattedDate && (
-          <div className="mb-8">
-            <Link href="/dashboard">
-              <Button className="w-full h-14">
-                Accéder à mon espace
+        {/* Appel à l'action - Import de pièces */}
+        <Card className="bg-emerald-50 border-emerald-200 mb-4">
+          <CardContent className="p-6">
+            <h3 className="font-serif font-bold text-lg mb-3 text-emerald-700">
+              ✨ Préparez votre entretien dès maintenant
+            </h3>
+            <p className="text-foreground mb-4">
+              Pour un entretien efficace, <strong>importez vos pièces</strong> dans votre espace client. 
+              Plus votre dossier sera complet, plus l&apos;avocat pourra vous conseiller précisément.
+            </p>
+            <Link href="/dashboard/pieces">
+              <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white">
+                Importer mes pièces maintenant
               </Button>
             </Link>
-          </div>
-        )}
+          </CardContent>
+        </Card>
+
+        {/* Lien discret vers l'espace */}
+        <p className="text-center text-sm text-muted-foreground mb-6">
+          Vous pourrez reprendre l&apos;import à tout moment depuis{" "}
+          <Link href="/dashboard" className="text-primary hover:underline font-medium">
+            votre espace personnel
+          </Link>
+        </p>
 
         {/* Info prochaines étapes */}
         <Card className="bg-primary text-white">
           <CardContent className="p-6">
             <h3 className="font-serif font-bold text-lg mb-4">
-              Prochaines étapes
+              Conseils pour vos pièces
             </h3>
             <ul className="space-y-3 text-white/90">
               <li className="flex items-start gap-3">
                 <Badge className="bg-white/20 text-white mt-0.5">1</Badge>
                 <span>
-                  Vous recevrez un lien de visioconférence par email avant le rendez-vous
+                  <strong>Scannez proprement</strong> vos documents (photos nettes, lisibles, pas de flou)
                 </span>
               </li>
               <li className="flex items-start gap-3">
                 <Badge className="bg-white/20 text-white mt-0.5">2</Badge>
                 <span>
-                  Préparez les documents relatifs à votre fraude (relevés, captures d&apos;écran, échanges avec la banque)
+                  <strong>Ordre chronologique</strong> : classez vos pièces par date (les plus anciennes en premier)
                 </span>
               </li>
               <li className="flex items-start gap-3">
                 <Badge className="bg-white/20 text-white mt-0.5">3</Badge>
                 <span>
-                  Notez les dates clés et montants concernés pour faciliter l&apos;entretien
+                  <strong>Décrivez chaque pièce</strong> : ajoutez une courte description pour aider l&apos;avocat (ex: "Relevé BNP octobre 2024 - virement frauduleux de 3000€")
+                </span>
+              </li>
+              <li className="flex items-start gap-3">
+                <Badge className="bg-white/20 text-white mt-0.5">4</Badge>
+                <span>
+                  <strong>Rédigez un résumé</strong> : dates clés, montants, chronologie des faits. Soyez concis et factuel.
                 </span>
               </li>
             </ul>

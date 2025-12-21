@@ -24,7 +24,7 @@ export function Problem() {
   ];
 
   return (
-    <section id="probleme" className="py-20 lg:py-32 bg-background">
+    <section id="probleme" className="py-16 lg:py-24 bg-background">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="max-w-3xl mx-auto text-center mb-16">
@@ -43,28 +43,27 @@ export function Problem() {
         </div>
 
         {/* Tactiques */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-10 max-w-6xl mx-auto mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 max-w-4xl mx-auto mb-12">
           {tactics.map((tactic, index) => (
             <div 
               key={tactic.title} 
-              className="group bg-card rounded-2xl overflow-hidden border-2 border-border hover:border-primary/30 transition-all duration-300 hover:shadow-elegant-lg"
+              className="group bg-card rounded-xl overflow-hidden border border-border hover:border-primary/30 transition-all duration-300 hover:shadow-elegant"
               style={{ animationDelay: `${index * 100}ms` }}
             >
-              {/* Image - affiche l'image complète avec le titre visible */}
-              <div className="relative w-full bg-white">
+              {/* Image complète, réduite proportionnellement */}
+              <div className="relative bg-white">
                 <Image
                   src={tactic.image}
                   alt={tactic.title}
-                  width={400}
-                  height={600}
-                  className="w-full h-auto group-hover:scale-105 transition-transform duration-500"
+                  width={280}
+                  height={350}
+                  className="w-full h-auto group-hover:scale-[1.02] transition-transform duration-500"
                 />
               </div>
               
-              {/* Contenu */}
-              <div className="p-5 text-center bg-card">
-                <p className="text-sm text-muted-foreground mb-2 font-medium">({tactic.subtitle})</p>
-                <p className="text-base text-foreground leading-relaxed">
+              {/* Description */}
+              <div className="px-4 py-2 text-center bg-card">
+                <p className="text-sm text-foreground leading-relaxed">
                   {tactic.description}
                 </p>
               </div>

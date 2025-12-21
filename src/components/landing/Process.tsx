@@ -19,17 +19,17 @@ export function Process() {
     },
     {
       number: "02",
-      icon: FileSignature,
-      title: "Convention d'honoraires",
-      description: "Vous recevez une proposition de convention d'honoraires avec le détail des actions ainsi financées et les frais annexes (huissier, audiencier). Ces honoraires et frais sont calculés au plus juste de vos intérêts et en fonction du préjudice.",
-      detail: "Transparence totale sur les coûts",
-    },
-    {
-      number: "03",
       icon: FileText,
       title: "Constitution du dossier",
       description: "Vous importez vos pièces via notre plateforme sécurisée. Notre système les classe automatiquement.",
       detail: "Espace client dédié",
+    },
+    {
+      number: "03",
+      icon: FileSignature,
+      title: "Convention d'honoraires",
+      description: "Grâce à nos process automatisés, nous avons réduit les coûts de traitement de 40%. Résultat : nous pouvons défendre tous les dossiers, quel que soit le montant du préjudice.",
+      detail: "Transparence totale sur les coûts",
     },
     {
       number: "04",
@@ -48,7 +48,7 @@ export function Process() {
   ];
 
   return (
-    <section id="processus" className="py-20 lg:py-32 bg-muted/30">
+    <section id="processus" className="py-16 lg:py-24 bg-muted/30">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="max-w-3xl mx-auto text-center mb-16">

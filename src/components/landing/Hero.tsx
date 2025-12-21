@@ -49,8 +49,8 @@ export function Hero() {
           </p>
 
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <div className="flex flex-col items-center">
+          <div className="flex flex-col items-center gap-3">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Button
                 asChild
                 size="lg"
@@ -61,18 +61,18 @@ export function Hero() {
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </a>
               </Button>
-              <span className="text-white/50 text-sm mt-2 font-light">
-                Entretien préliminaire : 90€
-              </span>
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className="border-white/30 bg-white/10 text-white hover:bg-white/20 font-semibold text-lg px-8 py-6"
+              >
+                <a href="#processus">Comment ça marche ?</a>
+              </Button>
             </div>
-            <Button
-              asChild
-              size="lg"
-              variant="outline"
-              className="border-white/30 bg-white/10 text-white hover:bg-white/20 font-semibold text-lg px-8 py-6"
-            >
-              <a href="#processus">Comment ça marche ?</a>
-            </Button>
+            <span className="text-white/50 text-sm font-light">
+              Entretien préliminaire : 90€
+            </span>
           </div>
 
           {/* Stats rapides */}
