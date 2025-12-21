@@ -163,22 +163,6 @@ La banque refuse de me rembourser en invoquant ma "négligence grave".`);
     statut: "convention_en_attente_signature" as StatutDossier, // Statut actuel
   });
 
-  const statutActuel = statutsConfig[dossier.statut];
-
-  // Génération de la référence : Nom C/ Banque - AAAA-JJMM-NNN
-  const genererReference = () => {
-    const nomPlaignant = victimes[0]?.nom?.toUpperCase() || "PLAIGNANT";
-    const nomBanque = banque.nom?.toUpperCase() || "BANQUE";
-    const date = new Date(dossier.datePaiement);
-    const annee = date.getFullYear();
-    const jour = String(date.getDate()).padStart(2, "0");
-    const mois = String(date.getMonth() + 1).padStart(2, "0");
-    const numero = String(dossier.numeroDossier).padStart(3, "0");
-    return `${nomPlaignant} C/ ${nomBanque} - ${annee}-${jour}${mois}-${numero}`;
-  };
-
-  const reference = genererReference();
-
   const [victimes, setVictimes] = useState<Victime[]>([
     {
       id: "1",
@@ -201,6 +185,22 @@ La banque refuse de me rembourser en invoquant ma "négligence grave".`);
     adresseAgence: "15 Rue de la République, 75001 Paris",
     datePremiereOperation: "15 novembre 2024",
   });
+
+  const statutActuel = statutsConfig[dossier.statut];
+
+  // Génération de la référence : Nom C/ Banque - AAAA-JJMM-NNN
+  const genererReference = () => {
+    const nomPlaignant = victimes[0]?.nom?.toUpperCase() || "PLAIGNANT";
+    const nomBanque = banque.nom?.toUpperCase() || "BANQUE";
+    const date = new Date(dossier.datePaiement);
+    const annee = date.getFullYear();
+    const jour = String(date.getDate()).padStart(2, "0");
+    const mois = String(date.getMonth() + 1).padStart(2, "0");
+    const numero = String(dossier.numeroDossier).padStart(3, "0");
+    return `${nomPlaignant} C/ ${nomBanque} - ${annee}-${jour}${mois}-${numero}`;
+  };
+
+  const reference = genererReference();
 
   const [montantPrejudice] = useState(5500);
 
