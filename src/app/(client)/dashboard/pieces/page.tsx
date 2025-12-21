@@ -24,6 +24,7 @@ import {
   X,
   Edit3,
   Save,
+  Trash2,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -146,6 +147,26 @@ export default function PiecesPage() {
     a.download = doc.file_name;
     a.target = "_blank";
     a.click();
+  };
+
+  // Supprimer un document
+  const handleDelete = async (doc: Document) => {
+    if (!supabase) return;
+    
+    const confirmDelete = window.confirm(`Voulez-vous vraiment supprimer "${doc.file_name}" ?`);
+    if (!confirmDelete) return;
+
+    // Supprimer du Storage
+    const { error } = await supabase.storage
+      .from("client-documents")
+      .remove([doc.file_path]);
+
+    if (!error) {
+      // Retirer de la liste locale
+      setDocuments(docs => docs.filter(d => d.id !== doc.id));
+    } else {
+      alert("Erreur lors de la suppression. Veuillez réessayer.");
+    }
   };
 
   // Ouvrir le formulaire d'édition
@@ -302,18 +323,26 @@ export default function PiecesPage() {
             </div>
           ) : (
             <div className="space-y-4">
-              {documents.map((doc) => (
+              {documents.map((doc, index) => (
                 <div
                   key={doc.id}
                   className="border rounded-lg overflow-hidden"
                 >
                   {/* Ligne principale du document */}
                   <div className="flex items-center gap-4 p-4 bg-muted/30">
-                    <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center border">
+                    {/* Numéro de pièce */}
+                    <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                      {index + 1}
+                    </div>
+                    <div className="w-8 h-8 bg-white rounded flex items-center justify-center border flex-shrink-0">
                       {getFileIcon(doc.file_type, doc.file_name)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{doc.file_name}</p>
+                      <p className="font-medium truncate">
+                        <span className="text-primary font-semibold">Pièce n°{index + 1}</span>
+                        <span> – </span>
+                        <span>{doc.designation || doc.file_name}</span>
+                      </p>
                       <div className="flex items-center gap-3 text-sm text-muted-foreground">
                         <span>{formatFileSize(doc.file_size)}</span>
                         <span>•</span>
@@ -327,7 +356,7 @@ export default function PiecesPage() {
                         {doc.designation && (
                           <>
                             <span>•</span>
-                            <span className="text-primary font-medium">{doc.designation}</span>
+                            <span className="text-muted-foreground/70 italic">{doc.file_name}</span>
                           </>
                         )}
                       </div>
@@ -372,6 +401,17 @@ export default function PiecesPage() {
                         title="Télécharger"
                       >
                         <Download className="w-4 h-4" />
+                      </Button>
+
+                      {/* Bouton Supprimer */}
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        onClick={() => handleDelete(doc)}
+                        title="Supprimer"
+                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
                   </div>

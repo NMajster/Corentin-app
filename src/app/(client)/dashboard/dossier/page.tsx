@@ -9,23 +9,22 @@ import {
   Building2,
   Calendar,
   Euro,
-  Clock,
   CheckCircle,
   AlertTriangle,
   Download,
   ExternalLink,
   Phone,
   Mail,
+  FolderOpen,
+  ArrowRight,
 } from "lucide-react";
 import Link from "next/link";
 
 export default function DossierPage() {
-  // Données de démonstration
+  // Données de démonstration - à connecter avec Supabase
   const dossier = {
     reference: "DOS-20241217-abc123",
     dateCreation: "17 décembre 2024",
-    statut: "pieces_en_attente",
-    statutLabel: "Pièces en attente",
     typeContentieux: "Fraude au faux conseiller",
   };
 
@@ -63,27 +62,16 @@ La banque refuse de me rembourser en invoquant ma "négligence grave".`,
       statut: "signe",
       date: "18 décembre 2024",
     },
-    {
-      nom: "Mise en demeure",
-      type: "mise_en_demeure",
-      statut: "en_attente",
-      date: null,
-    },
   ];
 
-  const etapes = [
-    { label: "Création dossier", completed: true, date: "17/12/2024" },
-    { label: "Entretien initial", completed: true, date: "18/12/2024" },
-    { label: "Convention signée", completed: true, date: "18/12/2024" },
-    { label: "Pièces complètes", completed: false, date: null },
-    { label: "Mise en demeure", completed: false, date: null },
-    { label: "Réponse banque", completed: false, date: null },
-    { label: "Assignation", completed: false, date: null },
-    { label: "Jugement", completed: false, date: null },
-  ];
+  // Nombre de pièces importées (à connecter avec Supabase Storage)
+  const piecesImportees = 10;
 
-  const currentStep = etapes.findIndex((e) => !e.completed);
-  const progress = Math.round((currentStep / etapes.length) * 100);
+  // Prochaine étape définie par l'avocat (sera éditable depuis le back-office)
+  const prochaineEtape = {
+    titre: "Constitution du dossier",
+    description: "Nous analysons vos pièces et préparons la stratégie.",
+  };
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -105,64 +93,46 @@ La banque refuse de me rembourser en invoquant ma "négligence grave".`,
         </div>
       </div>
 
-      {/* Barre de progression */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-foreground">Progression du dossier</h3>
-            <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
-              <Clock className="w-3 h-3 mr-1" />
-              {dossier.statutLabel}
-            </Badge>
-          </div>
-          
-          {/* Progress bar */}
-          <div className="relative mb-6">
-            <div className="h-2 bg-muted rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-gradient-to-r from-primary to-accent rounded-full transition-all duration-500"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-            <span className="absolute right-0 -top-6 text-sm font-medium text-primary">
-              {progress}%
-            </span>
-          </div>
-
-          {/* Étapes */}
-          <div className="flex justify-between overflow-x-auto pb-2">
-            {etapes.map((etape, index) => (
-              <div key={index} className="flex flex-col items-center min-w-[80px]">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center mb-2 ${
-                  etape.completed 
-                    ? "bg-green-100 text-green-600" 
-                    : index === currentStep
-                    ? "bg-accent/20 text-accent border-2 border-accent"
-                    : "bg-muted text-muted-foreground"
-                }`}>
-                  {etape.completed ? (
-                    <CheckCircle className="w-4 h-4" />
-                  ) : (
-                    <span className="text-xs font-medium">{index + 1}</span>
-                  )}
+      {/* Résumé du dossier */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Pièces importées */}
+        <Card className="border-l-4 border-l-primary">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+                  <FolderOpen className="w-6 h-6 text-primary" />
                 </div>
-                <span className={`text-xs text-center ${
-                  etape.completed || index === currentStep
-                    ? "text-foreground font-medium"
-                    : "text-muted-foreground"
-                }`}>
-                  {etape.label}
-                </span>
-                {etape.date && (
-                  <span className="text-xs text-muted-foreground mt-1">
-                    {etape.date}
-                  </span>
-                )}
+                <div>
+                  <p className="text-sm text-muted-foreground">Pièces importées</p>
+                  <p className="text-2xl font-bold text-foreground">{piecesImportees}</p>
+                </div>
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              <Link href="/dashboard/pieces">
+                <Button variant="ghost" size="sm" className="text-primary">
+                  Voir <ArrowRight className="w-4 h-4 ml-1" />
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Prochaine étape */}
+        <Card className="border-l-4 border-l-emerald-500">
+          <CardContent className="p-6">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                <ArrowRight className="w-6 h-6 text-emerald-600" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Prochaine étape</p>
+                <p className="font-semibold text-foreground">{prochaineEtape.titre}</p>
+                <p className="text-sm text-muted-foreground mt-1">{prochaineEtape.description}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Tabs */}
       <Tabs defaultValue="infos" className="space-y-6">
@@ -330,13 +300,13 @@ La banque refuse de me rembourser en invoquant ma "négligence grave".`,
                 ))}
               </div>
 
-              <div className="mt-6 p-4 bg-amber-50 rounded-lg border border-amber-200">
+              <div className="mt-6 p-4 bg-primary/5 rounded-lg border border-primary/20">
                 <div className="flex items-start gap-3">
-                  <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                  <FileText className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
                   <div>
-                    <p className="font-medium text-amber-800">Documents à venir</p>
-                    <p className="text-sm text-amber-700">
-                      La mise en demeure sera générée une fois toutes vos pièces importées.
+                    <p className="font-medium text-foreground">Documents à venir</p>
+                    <p className="text-sm text-muted-foreground">
+                      Les documents de procédure seront ajoutés ici au fur et à mesure de l&apos;avancement de votre dossier.
                     </p>
                   </div>
                 </div>
