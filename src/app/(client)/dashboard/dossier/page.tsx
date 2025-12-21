@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -38,9 +38,11 @@ import {
   MapPin,
   CreditCard,
   Clock,
+  Loader2,
 } from "lucide-react";
 import Link from "next/link";
 import { EtapesDossier } from "@/components/dossier/EtapesDossier";
+import { createClient } from "@/lib/supabase/client";
 
 // Types de fraudes bancaires
 const typesFraude = [
@@ -143,50 +145,179 @@ interface Banque {
 }
 
 export default function DossierPage() {
+  // État de chargement
+  const [loading, setLoading] = useState(true);
+  const [piecesImportees, setPiecesImportees] = useState(0);
+
   // États pour l'édition
   const [isEditingFaits, setIsEditingFaits] = useState(false);
-  const [descriptionFaits, setDescriptionFaits] = useState(`Le 15 novembre 2024, j'ai reçu un appel téléphonique d'une personne se présentant comme conseiller de la Société Générale. 
-    
-Cette personne connaissait mon nom, mon adresse et mon numéro de compte. Elle m'a alerté sur des mouvements suspects sur mon compte et m'a demandé de valider des opérations pour "sécuriser" mon compte.
+  const [descriptionFaits, setDescriptionFaits] = useState("");
+  const [tempDescription, setTempDescription] = useState("");
 
-Sous la pression et la panique, j'ai validé via l'application mobile trois virements pour un total de 5 500€ vers des comptes que je ne connaissais pas.
-
-Après avoir raccroché, j'ai contacté ma vraie agence qui m'a confirmé qu'il s'agissait d'une fraude. J'ai immédiatement fait opposition et déposé plainte.
-
-La banque refuse de me rembourser en invoquant ma "négligence grave".`);
-  const [tempDescription, setTempDescription] = useState(descriptionFaits);
-
-  // Données de démonstration - à connecter avec Supabase
+  // Données du dossier
   const [dossier, setDossier] = useState({
-    dateCreation: "17 décembre 2024",
-    datePaiement: "2024-12-17", // Date du paiement des 90€
-    numeroDossier: 1, // Numéro séquentiel du jour
-    typeContentieux: "faux_conseiller",
-    statut: "convention_en_attente_signature" as StatutDossier, // Statut actuel
+    id: "",
+    dateCreation: "",
+    datePaiement: "",
+    numeroDossier: 1,
+    typeContentieux: "fraude_bancaire",
+    statut: "en_attente_convention" as StatutDossier,
   });
 
   const [victimes, setVictimes] = useState<Victime[]>([
     {
       id: "1",
-      nom: "Dupont",
-      prenom: "Jean",
-      email: "jean.dupont@email.fr",
-      telephone: "06 12 34 56 78",
-      adresse: "123 Rue de Paris",
-      codePostal: "75001",
-      ville: "Paris",
-      dateNaissance: "15/03/1980",
-      lieuNaissance: "Lyon",
+      nom: "",
+      prenom: "",
+      email: "",
+      telephone: "",
+      adresse: "",
+      codePostal: "",
+      ville: "",
+      dateNaissance: "",
+      lieuNaissance: "",
       pieceIdentite: null,
     },
   ]);
 
   const [banque, setBanque] = useState<Banque>({
-    nom: "Société Générale",
-    siegeSocial: "29 Boulevard Haussmann, 75009 Paris",
-    adresseAgence: "15 Rue de la République, 75001 Paris",
-    datePremiereOperation: "15 novembre 2024",
+    nom: "",
+    siegeSocial: "",
+    adresseAgence: "",
+    datePremiereOperation: "",
   });
+
+  // Charger les données depuis Supabase
+  useEffect(() => {
+    async function loadData() {
+      const supabase = createClient();
+      if (!supabase) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        // Récupérer l'utilisateur connecté
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          setLoading(false);
+          return;
+        }
+
+        // Récupérer le profil client
+        const { data: profile } = await supabase
+          .from("profils_clients")
+          .select("*")
+          .eq("user_id", user.id)
+          .single();
+
+        // Récupérer le dossier
+        const { data: dossierData } = await supabase
+          .from("dossiers")
+          .select("*")
+          .eq("user_id", user.id)
+          .single();
+
+        if (dossierData) {
+          // Mapper le statut Supabase vers notre enum local
+          let mappedStatut: StatutDossier = "en_attente_convention";
+          switch (dossierData.statut) {
+            case "nouveau":
+            case "en_attente_entretien":
+            case "entretien_realise":
+              mappedStatut = "en_attente_convention";
+              break;
+            case "convention_signee":
+            case "pieces_en_attente":
+              mappedStatut = "dossier_actif";
+              break;
+            case "mise_en_demeure":
+            case "reponse_banque":
+              mappedStatut = "mise_en_demeure";
+              break;
+            case "assignation":
+            case "audience":
+            case "jugement":
+              mappedStatut = "contentieux";
+              break;
+            case "clos_succes":
+            case "clos_echec":
+            case "abandonne":
+              mappedStatut = "cloture";
+              break;
+          }
+
+          setDossier({
+            id: dossierData.id,
+            dateCreation: new Date(dossierData.created_at).toLocaleDateString("fr-FR", {
+              day: "numeric",
+              month: "long",
+              year: "numeric"
+            }),
+            datePaiement: dossierData.created_at?.split("T")[0] || "",
+            numeroDossier: 1,
+            typeContentieux: dossierData.type_contentieux || "fraude_bancaire",
+            statut: mappedStatut,
+          });
+        }
+
+        // Mettre à jour les infos de la victime depuis le profil
+        if (profile || user) {
+          const userMeta = user.user_metadata || {};
+          setVictimes([{
+            id: "1",
+            nom: userMeta.nom || profile?.nom || "",
+            prenom: userMeta.prenom || profile?.prenom || "",
+            email: user.email || "",
+            telephone: userMeta.telephone || profile?.telephone || "",
+            adresse: profile?.adresse || "",
+            codePostal: profile?.code_postal || "",
+            ville: profile?.ville || "",
+            dateNaissance: profile?.date_naissance || "",
+            lieuNaissance: profile?.lieu_naissance || "",
+            pieceIdentite: null,
+          }]);
+
+          // Mettre à jour les infos banque si disponibles
+          if (profile?.banque_concernee) {
+            setBanque(prev => ({ ...prev, nom: profile.banque_concernee }));
+          }
+        }
+
+        // Compter les pièces importées depuis Storage
+        const userEmail = user.email?.replace(/[@.]/g, "_") || "";
+        const { data: files } = await supabase.storage
+          .from("client-documents")
+          .list(`documents/${userEmail}`, { limit: 100 });
+
+        if (files) {
+          // Compter récursivement (dossiers inclus)
+          let totalFiles = 0;
+          for (const item of files) {
+            if (item.metadata) {
+              totalFiles++;
+            } else {
+              // C'est un dossier, lister son contenu
+              const { data: subFiles } = await supabase.storage
+                .from("client-documents")
+                .list(`documents/${userEmail}/${item.name}`, { limit: 100 });
+              if (subFiles) {
+                totalFiles += subFiles.filter(f => f.metadata).length;
+              }
+            }
+          }
+          setPiecesImportees(totalFiles);
+        }
+
+      } catch (error) {
+        console.error("Erreur chargement données:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadData();
+  }, []);
 
   const statutActuel = statutsConfig[dossier.statut];
 
@@ -215,9 +346,6 @@ La banque refuse de me rembourser en invoquant ma "négligence grave".`);
       date: "18 décembre 2024",
     },
   ];
-
-  // Nombre de pièces importées (à connecter avec Supabase Storage)
-  const piecesImportees = 10;
 
   // Prochaine étape définie par l'avocat
   const prochaineEtape = {
@@ -268,6 +396,18 @@ La banque refuse de me rembourser en invoquant ma "négligence grave".`);
   const getTypeFraudeLabel = (value: string) => {
     return typesFraude.find((t) => t.value === value)?.label || value;
   };
+
+  // Écran de chargement
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <Loader2 className="w-10 h-10 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">Chargement de votre dossier...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 animate-fade-in">
