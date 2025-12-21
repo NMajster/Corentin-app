@@ -182,31 +182,45 @@ function ConfirmationContent() {
           </div>
         )}
 
-        {/* Appel à l'action - Import de pièces */}
+        {/* Accès à l'espace client */}
         <Card className="bg-emerald-50 border-emerald-200 mb-4">
           <CardContent className="p-6">
             <h3 className="font-serif font-bold text-lg mb-3 text-emerald-700">
-              ✨ Préparez votre entretien dès maintenant
+              ✨ Accédez à votre espace client
+            </h3>
+            <p className="text-foreground mb-4">
+              Un email vous a été envoyé à <strong>{emailParam}</strong> avec un lien de connexion. 
+              Cliquez dessus pour accéder à votre espace et commencer à importer vos pièces.
+            </p>
+            <div className="space-y-3">
+              <Link href="/login">
+                <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white">
+                  <Mail className="w-5 h-5 mr-2" />
+                  Connexion à mon espace
+                </Button>
+              </Link>
+              <p className="text-xs text-center text-emerald-700">
+                Pas reçu l&apos;email ? Vérifiez vos spams ou{" "}
+                <Link href="/login" className="underline">
+                  demandez un nouveau lien
+                </Link>
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Préparer l'entretien */}
+        <Card className="bg-blue-50 border-blue-200 mb-4">
+          <CardContent className="p-6">
+            <h3 className="font-serif font-bold text-lg mb-3 text-blue-700">
+              📁 Préparez votre entretien
             </h3>
             <p className="text-foreground mb-4">
               Pour un entretien efficace, <strong>importez vos pièces</strong> dans votre espace client. 
               Plus votre dossier sera complet, plus l&apos;avocat pourra vous conseiller précisément.
             </p>
-            <Link href="/dashboard/pieces">
-              <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white">
-                Importer mes pièces maintenant
-              </Button>
-            </Link>
           </CardContent>
         </Card>
-
-        {/* Lien discret vers l'espace */}
-        <p className="text-center text-sm text-muted-foreground mb-6">
-          Vous pourrez reprendre l&apos;import à tout moment depuis{" "}
-          <Link href="/dashboard" className="text-primary hover:underline font-medium">
-            votre espace personnel
-          </Link>
-        </p>
 
         {/* Info prochaines étapes */}
         <Card className="bg-primary text-white">

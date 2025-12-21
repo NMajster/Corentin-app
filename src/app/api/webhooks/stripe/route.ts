@@ -79,14 +79,90 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const nom = session.metadata?.nom || "";
   const telephone = session.metadata?.telephone || "";
 
-  // Enregistrer le paiement
+  if (!email) {
+    console.error("Email manquant dans la session Stripe");
+    return;
+  }
+
+  // 1. Vérifier si l'utilisateur existe déjà dans auth.users
+  const { data: existingUsers } = await supabase.auth.admin.listUsers();
+  const existingUser = existingUsers?.users?.find(u => u.email === email);
+
+  let userId: string;
+
+  if (existingUser) {
+    // L'utilisateur existe déjà
+    userId = existingUser.id;
+    console.log(`Utilisateur existant trouvé: ${userId}`);
+  } else {
+    // 2. Créer un nouvel utilisateur avec un mot de passe temporaire
+    const tempPassword = crypto.randomUUID();
+    
+    const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
+      email,
+      password: tempPassword,
+      email_confirm: true, // Confirmer l'email automatiquement
+      user_metadata: {
+        prenom,
+        nom,
+        telephone,
+        full_name: `${prenom} ${nom}`.trim(),
+      },
+    });
+
+    if (createError || !newUser.user) {
+      console.error("Erreur création utilisateur:", createError);
+      return;
+    }
+
+    userId = newUser.user.id;
+    console.log(`Nouvel utilisateur créé: ${userId}`);
+
+    // 3. Créer le profil client
+    const { error: profileError } = await supabase.from("profils_clients").insert({
+      user_id: userId,
+    });
+
+    if (profileError) {
+      console.error("Erreur création profil:", profileError);
+    }
+
+    // 4. Créer le dossier initial
+    const { error: dossierError } = await supabase.from("dossiers").insert({
+      user_id: userId,
+      statut: "nouveau",
+      type_contentieux: "fraude_bancaire",
+    });
+
+    if (dossierError) {
+      console.error("Erreur création dossier:", dossierError);
+    }
+
+    // 5. Envoyer un magic link pour que l'utilisateur définisse son mot de passe
+    const { error: resetError } = await supabase.auth.admin.generateLink({
+      type: "magiclink",
+      email,
+      options: {
+        redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/dossier`,
+      },
+    });
+
+    if (resetError) {
+      console.error("Erreur envoi magic link:", resetError);
+    } else {
+      console.log(`Magic link envoyé à ${email}`);
+    }
+  }
+
+  // 6. Enregistrer le paiement
   const { data: payment, error: paymentError } = await supabase
     .from("payments")
     .insert({
+      user_id: userId,
       stripe_session_id: session.id,
       stripe_payment_intent_id: session.payment_intent as string,
       stripe_customer_id: session.customer as string,
-      amount: (session.amount_total || 0) / 100, // Convertir centimes en euros
+      amount: (session.amount_total || 0) / 100,
       currency: session.currency?.toUpperCase() || "EUR",
       status: "completed",
       payment_type: "entretien_initial",
@@ -106,22 +182,5 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     return;
   }
 
-  console.log("Paiement enregistré:", payment?.id);
-
-  // Vérifier si un utilisateur existe avec cet email
-  const { data: existingUser } = await supabase
-    .from("profils_clients")
-    .select("user_id")
-    .eq("email", email)
-    .single();
-
-  if (existingUser) {
-    // Lier le paiement à l'utilisateur
-    await supabase
-      .from("payments")
-      .update({ user_id: existingUser.user_id })
-      .eq("id", payment.id);
-  }
-
-  console.log(`Paiement traité pour ${email}: ${session.amount_total! / 100}€`);
+  console.log(`Paiement traité pour ${email}: ${session.amount_total! / 100}€ (Payment ID: ${payment?.id})`);
 }

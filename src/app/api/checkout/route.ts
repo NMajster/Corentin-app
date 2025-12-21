@@ -18,6 +18,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const { telephone } = body;
+
     // Créer la session de paiement Stripe
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -40,6 +42,7 @@ export async function POST(request: NextRequest) {
         email,
         prenom: prenom || "",
         nom: nom || "",
+        telephone: telephone || "",
         type: "entretien_initial",
       },
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/rendez-vous/calendrier?session_id={CHECKOUT_SESSION_ID}`,
