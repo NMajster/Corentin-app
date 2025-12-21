@@ -52,6 +52,73 @@ const typesFraude = [
   { value: "autre", label: "Autre" },
 ];
 
+// Statuts du dossier
+type StatutDossier = 
+  | "convention_en_redaction"
+  | "convention_en_attente_signature"
+  | "dossier_actif"
+  | "mise_en_demeure"
+  | "contentieux"
+  | "cloture";
+
+const statutsConfig: Record<StatutDossier, { 
+  label: string; 
+  description: string;
+  color: string;
+  bgColor: string;
+  borderColor: string;
+  etape: number;
+}> = {
+  convention_en_redaction: {
+    label: "Convention en cours de rédaction",
+    description: "L'avocat prépare votre convention d'honoraires",
+    color: "text-amber-700",
+    bgColor: "bg-amber-50",
+    borderColor: "border-amber-200",
+    etape: 1,
+  },
+  convention_en_attente_signature: {
+    label: "Convention en attente de signature",
+    description: "Veuillez signer la convention d'honoraires pour activer votre dossier",
+    color: "text-orange-700",
+    bgColor: "bg-orange-50",
+    borderColor: "border-orange-200",
+    etape: 2,
+  },
+  dossier_actif: {
+    label: "Dossier actif",
+    description: "Votre dossier est en cours de traitement",
+    color: "text-emerald-700",
+    bgColor: "bg-emerald-50",
+    borderColor: "border-emerald-200",
+    etape: 3,
+  },
+  mise_en_demeure: {
+    label: "Mise en demeure envoyée",
+    description: "La mise en demeure a été envoyée à la banque",
+    color: "text-blue-700",
+    bgColor: "bg-blue-50",
+    borderColor: "border-blue-200",
+    etape: 4,
+  },
+  contentieux: {
+    label: "Contentieux en cours",
+    description: "Procédure judiciaire engagée",
+    color: "text-purple-700",
+    bgColor: "bg-purple-50",
+    borderColor: "border-purple-200",
+    etape: 5,
+  },
+  cloture: {
+    label: "Dossier clôturé",
+    description: "Affaire terminée",
+    color: "text-gray-700",
+    bgColor: "bg-gray-50",
+    borderColor: "border-gray-200",
+    etape: 6,
+  },
+};
+
 interface Victime {
   id: string;
   nom: string;
@@ -93,7 +160,10 @@ La banque refuse de me rembourser en invoquant ma "négligence grave".`);
     datePaiement: "2024-12-17", // Date du paiement des 90€
     numeroDossier: 1, // Numéro séquentiel du jour
     typeContentieux: "faux_conseiller",
+    statut: "convention_en_attente_signature" as StatutDossier, // Statut actuel
   });
+
+  const statutActuel = statutsConfig[dossier.statut];
 
   // Génération de la référence : Nom C/ Banque - AAAA-JJMM-NNN
   const genererReference = () => {
@@ -215,6 +285,71 @@ La banque refuse de me rembourser en invoquant ma "négligence grave".`);
           </Button>
         </div>
       </div>
+
+      {/* Bandeau de statut */}
+      <Card className={`${statutActuel.bgColor} ${statutActuel.borderColor} border-2`}>
+        <CardContent className="p-4">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className={`w-3 h-3 rounded-full ${
+                dossier.statut === "dossier_actif" ? "bg-emerald-500 animate-pulse" :
+                dossier.statut === "convention_en_attente_signature" ? "bg-orange-500" :
+                dossier.statut === "convention_en_redaction" ? "bg-amber-500" :
+                "bg-gray-400"
+              }`} />
+              <div>
+                <p className={`font-semibold ${statutActuel.color}`}>
+                  {statutActuel.label}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {statutActuel.description}
+                </p>
+              </div>
+            </div>
+            
+            {/* Action selon le statut */}
+            {dossier.statut === "convention_en_attente_signature" && (
+              <Button className="bg-orange-600 hover:bg-orange-700">
+                <FileText className="w-4 h-4 mr-2" />
+                Signer la convention
+              </Button>
+            )}
+          </div>
+
+          {/* Indicateur d'étapes simplifié */}
+          <div className="mt-4 flex items-center gap-2">
+            {[1, 2, 3].map((etape) => (
+              <div key={etape} className="flex items-center">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                  etape < statutActuel.etape 
+                    ? "bg-emerald-500 text-white" 
+                    : etape === statutActuel.etape
+                    ? `${statutActuel.bgColor} ${statutActuel.color} border-2 ${statutActuel.borderColor}`
+                    : "bg-gray-100 text-gray-400"
+                }`}>
+                  {etape < statutActuel.etape ? (
+                    <CheckCircle className="w-4 h-4" />
+                  ) : (
+                    etape
+                  )}
+                </div>
+                {etape < 3 && (
+                  <div className={`w-12 h-1 mx-1 rounded ${
+                    etape < statutActuel.etape ? "bg-emerald-500" : "bg-gray-200"
+                  }`} />
+                )}
+              </div>
+            ))}
+            <div className="ml-4 text-xs text-muted-foreground hidden md:block">
+              <span className={statutActuel.etape >= 1 ? "text-emerald-600" : ""}>Entretien</span>
+              {" → "}
+              <span className={statutActuel.etape >= 2 ? "text-emerald-600" : ""}>Convention</span>
+              {" → "}
+              <span className={statutActuel.etape >= 3 ? "text-emerald-600" : ""}>Dossier actif</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Résumé du dossier */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
