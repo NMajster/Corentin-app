@@ -2,6 +2,8 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import {
   Mail,
   FileWarning,
@@ -18,6 +20,12 @@ import {
   Phone,
   FileText,
   Award,
+  Download,
+  Bell,
+  MessageSquare,
+  Eye,
+  CalendarClock,
+  Paperclip,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -33,6 +41,34 @@ type TypeEtape =
 
 type StatutEtape = "a_venir" | "en_cours" | "terminee" | "annulee";
 
+interface Echeance {
+  id: string;
+  nature: string;
+  date: string;
+  heure?: string;
+  lieu?: string;
+  estPassee: boolean;
+}
+
+interface CompteRendu {
+  id: string;
+  titre: string;
+  contenu: string;
+  resumeClient?: string;
+  dateEvenement?: string;
+  createdAt: string;
+}
+
+interface PieceEtape {
+  id: string;
+  nomFichier: string;
+  description?: string;
+  typePiece?: string;
+  datePiece?: string;
+  storagePath: string;
+  isNew?: boolean; // Pour l'indicateur "Nouveau"
+}
+
 interface Etape {
   id: string;
   type: TypeEtape;
@@ -43,6 +79,10 @@ interface Etape {
   dateRealisee?: string;
   details?: Record<string, unknown>;
   sousEtapes?: Etape[];
+  // Nouveaux champs
+  echeances?: Echeance[];
+  comptesRendus?: CompteRendu[];
+  pieces?: PieceEtape[];
 }
 
 // Configuration des types d'étapes
@@ -125,17 +165,149 @@ const statutConfig: Record<
   },
 };
 
+// Composant pour afficher une échéance
+function EcheanceItem({ echeance }: { echeance: Echeance }) {
+  const isPast = echeance.estPassee;
+  const isUpcoming = !isPast && new Date(echeance.date) <= new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
+  return (
+    <div
+      className={`flex items-start gap-3 p-3 rounded-lg ${
+        isPast
+          ? "bg-gray-50"
+          : isUpcoming
+          ? "bg-amber-50 border border-amber-200"
+          : "bg-blue-50"
+      }`}
+    >
+      <CalendarClock
+        className={`w-5 h-5 mt-0.5 ${
+          isPast ? "text-gray-400" : isUpcoming ? "text-amber-600" : "text-blue-600"
+        }`}
+      />
+      <div className="flex-1">
+        <div className="flex items-center gap-2">
+          <p className={`font-medium ${isPast ? "text-gray-500" : "text-foreground"}`}>
+            {echeance.nature}
+          </p>
+          {isUpcoming && !isPast && (
+            <Badge className="bg-amber-100 text-amber-700 text-xs">
+              <Bell className="w-3 h-3 mr-1" />
+              Bientôt
+            </Badge>
+          )}
+          {isPast && (
+            <Badge className="bg-gray-100 text-gray-500 text-xs">Passée</Badge>
+          )}
+        </div>
+        <p className="text-sm text-muted-foreground">
+          {echeance.date}
+          {echeance.heure && ` à ${echeance.heure}`}
+        </p>
+        {echeance.lieu && (
+          <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+            <MapPin className="w-3 h-3" />
+            {echeance.lieu}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Composant pour afficher un compte-rendu
+function CompteRenduItem({ cr }: { cr: CompteRendu }) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  return (
+    <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex items-start gap-3">
+          <MessageSquare className="w-5 h-5 text-emerald-600 mt-0.5" />
+          <div>
+            <p className="font-medium text-foreground">{cr.titre}</p>
+            {cr.dateEvenement && (
+              <p className="text-xs text-muted-foreground">
+                Événement du {cr.dateEvenement}
+              </p>
+            )}
+          </div>
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="text-emerald-600"
+        >
+          <Eye className="w-4 h-4 mr-1" />
+          {isExpanded ? "Masquer" : "Lire"}
+        </Button>
+      </div>
+      {isExpanded && (
+        <div className="mt-3 pt-3 border-t border-emerald-200">
+          <p className="text-sm text-foreground whitespace-pre-line">
+            {cr.resumeClient || cr.contenu}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Composant pour afficher une pièce jointe
+function PieceItem({ piece }: { piece: PieceEtape }) {
+  return (
+    <div className="flex items-center justify-between p-3 bg-white border rounded-lg hover:bg-muted/50 transition-colors">
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+          <Paperclip className="w-5 h-5 text-primary" />
+        </div>
+        <div>
+          <div className="flex items-center gap-2">
+            <p className="font-medium text-sm">{piece.nomFichier}</p>
+            {piece.isNew && (
+              <Badge className="bg-accent text-accent-foreground text-xs">
+                Nouveau
+              </Badge>
+            )}
+          </div>
+          {piece.description && (
+            <p className="text-xs text-muted-foreground">{piece.description}</p>
+          )}
+          {piece.typePiece && (
+            <Badge variant="outline" className="text-xs mt-1">
+              {piece.typePiece}
+            </Badge>
+          )}
+        </div>
+      </div>
+      <Button variant="ghost" size="sm">
+        <Download className="w-4 h-4" />
+      </Button>
+    </div>
+  );
+}
+
 // Composant pour une étape individuelle
 function EtapeItem({ etape, isLast }: { etape: Etape; isLast: boolean }) {
-  const [isExpanded, setIsExpanded] = useState(etape.statut === "en_cours");
+  const [isExpanded, setIsExpanded] = useState(
+    etape.statut === "en_cours" || 
+    (etape.pieces && etape.pieces.some(p => p.isNew))
+  );
   const config = etapeConfig[etape.type];
   const statut = statutConfig[etape.statut];
   const Icon = config.icon;
   const StatutIcon = statut.icon;
 
-  const hasDetails =
-    etape.details && Object.keys(etape.details).length > 0;
+  const hasDetails = etape.details && Object.keys(etape.details).length > 0;
   const hasSousEtapes = etape.sousEtapes && etape.sousEtapes.length > 0;
+  const hasEcheances = etape.echeances && etape.echeances.length > 0;
+  const hasComptesRendus = etape.comptesRendus && etape.comptesRendus.length > 0;
+  const hasPieces = etape.pieces && etape.pieces.length > 0;
+  const hasContent = hasDetails || hasSousEtapes || hasEcheances || hasComptesRendus || hasPieces;
+
+  // Compter les nouveautés
+  const newPiecesCount = etape.pieces?.filter(p => p.isNew).length || 0;
 
   return (
     <div className="relative">
@@ -162,6 +334,8 @@ function EtapeItem({ etape, isLast }: { etape: Etape; isLast: boolean }) {
             className={`p-4 rounded-lg border ${
               etape.statut === "en_cours"
                 ? "border-blue-200 bg-blue-50/50"
+                : newPiecesCount > 0
+                ? "border-accent/50 bg-accent/5"
                 : "border-gray-100 bg-white"
             }`}
           >
@@ -176,6 +350,11 @@ function EtapeItem({ etape, isLast }: { etape: Etape; isLast: boolean }) {
                     <StatutIcon className="w-3 h-3 mr-1" />
                     {statut.label}
                   </Badge>
+                  {newPiecesCount > 0 && (
+                    <Badge className="bg-accent text-accent-foreground text-xs">
+                      {newPiecesCount} nouveau{newPiecesCount > 1 ? "x" : ""}
+                    </Badge>
+                  )}
                 </div>
                 {etape.description && (
                   <p className="text-sm text-muted-foreground mt-1">
@@ -199,7 +378,7 @@ function EtapeItem({ etape, isLast }: { etape: Etape; isLast: boolean }) {
             </div>
 
             {/* Bouton pour développer les détails */}
-            {(hasDetails || hasSousEtapes) && (
+            {hasContent && (
               <button
                 onClick={() => setIsExpanded(!isExpanded)}
                 className="flex items-center gap-1 text-sm text-primary mt-3 hover:underline"
@@ -210,44 +389,106 @@ function EtapeItem({ etape, isLast }: { etape: Etape; isLast: boolean }) {
                   <ChevronRight className="w-4 h-4" />
                 )}
                 {isExpanded ? "Masquer les détails" : "Voir les détails"}
+                {!isExpanded && (hasEcheances || hasComptesRendus || hasPieces) && (
+                  <span className="text-xs text-muted-foreground ml-2">
+                    ({[
+                      hasEcheances && `${etape.echeances!.length} échéance(s)`,
+                      hasComptesRendus && `${etape.comptesRendus!.length} CR`,
+                      hasPieces && `${etape.pieces!.length} pièce(s)`,
+                    ].filter(Boolean).join(", ")})
+                  </span>
+                )}
               </button>
             )}
 
-            {/* Détails expandés */}
-            {isExpanded && hasDetails && (
-              <div className="mt-4 pt-4 border-t border-gray-100 space-y-3">
-                {renderDetails(etape.type, etape.details!)}
-              </div>
-            )}
-
-            {/* Sous-étapes (pour assignation) */}
-            {isExpanded && hasSousEtapes && (
-              <div className="mt-4 pt-4 border-t border-gray-100 space-y-3">
-                {etape.sousEtapes!.map((sousEtape, idx) => (
-                  <div
-                    key={sousEtape.id}
-                    className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg"
-                  >
-                    <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
-                      <span className="text-xs font-medium">{idx + 1}</span>
+            {/* Contenu étendu */}
+            {isExpanded && (
+              <div className="mt-4 space-y-4">
+                {/* Échéances à venir */}
+                {hasEcheances && (
+                  <div>
+                    <h5 className="text-sm font-medium text-muted-foreground mb-2 flex items-center gap-2">
+                      <CalendarClock className="w-4 h-4" />
+                      Échéances
+                    </h5>
+                    <div className="space-y-2">
+                      {etape.echeances!.map((ech) => (
+                        <EcheanceItem key={ech.id} echeance={ech} />
+                      ))}
                     </div>
-                    <div className="flex-1">
-                      <p className="font-medium text-sm">{sousEtape.titre}</p>
-                      {sousEtape.datePrevue && (
-                        <p className="text-xs text-muted-foreground">
-                          {sousEtape.dateRealisee || sousEtape.datePrevue}
-                        </p>
-                      )}
-                    </div>
-                    <Badge
-                      className={`${statutConfig[sousEtape.statut].bgColor} ${
-                        statutConfig[sousEtape.statut].color
-                      } text-xs`}
-                    >
-                      {statutConfig[sousEtape.statut].label}
-                    </Badge>
                   </div>
-                ))}
+                )}
+
+                {/* Comptes-rendus */}
+                {hasComptesRendus && (
+                  <div>
+                    <h5 className="text-sm font-medium text-muted-foreground mb-2 flex items-center gap-2">
+                      <MessageSquare className="w-4 h-4" />
+                      Comptes-rendus
+                    </h5>
+                    <div className="space-y-2">
+                      {etape.comptesRendus!.map((cr) => (
+                        <CompteRenduItem key={cr.id} cr={cr} />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Pièces jointes */}
+                {hasPieces && (
+                  <div>
+                    <h5 className="text-sm font-medium text-muted-foreground mb-2 flex items-center gap-2">
+                      <Paperclip className="w-4 h-4" />
+                      Documents
+                    </h5>
+                    <div className="space-y-2">
+                      {etape.pieces!.map((piece) => (
+                        <PieceItem key={piece.id} piece={piece} />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Détails de l'étape */}
+                {hasDetails && (
+                  <div className="pt-2 border-t border-gray-100">
+                    {renderDetails(etape.type, etape.details!)}
+                  </div>
+                )}
+
+                {/* Sous-étapes (pour assignation) */}
+                {hasSousEtapes && (
+                  <div className="pt-2 border-t border-gray-100">
+                    <h5 className="text-sm font-medium text-muted-foreground mb-2">
+                      Étapes de la procédure
+                    </h5>
+                    {etape.sousEtapes!.map((sousEtape, idx) => (
+                      <div
+                        key={sousEtape.id}
+                        className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg mb-2"
+                      >
+                        <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
+                          <span className="text-xs font-medium">{idx + 1}</span>
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-medium text-sm">{sousEtape.titre}</p>
+                          {sousEtape.datePrevue && (
+                            <p className="text-xs text-muted-foreground">
+                              {sousEtape.dateRealisee || sousEtape.datePrevue}
+                            </p>
+                          )}
+                        </div>
+                        <Badge
+                          className={`${statutConfig[sousEtape.statut].bgColor} ${
+                            statutConfig[sousEtape.statut].color
+                          } text-xs`}
+                        >
+                          {statutConfig[sousEtape.statut].label}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -262,7 +503,7 @@ function renderDetails(type: TypeEtape, details: Record<string, unknown>) {
   switch (type) {
     case "courrier_recommande":
       return (
-        <>
+        <div className="space-y-2">
           {details.destinataire && (
             <DetailRow
               icon={User}
@@ -285,12 +526,12 @@ function renderDetails(type: TypeEtape, details: Record<string, unknown>) {
               success
             />
           )}
-        </>
+        </div>
       );
 
     case "mise_en_demeure":
       return (
-        <>
+        <div className="space-y-2">
           {details.montant_reclame && (
             <DetailRow
               icon={FileText}
@@ -312,12 +553,12 @@ function renderDetails(type: TypeEtape, details: Record<string, unknown>) {
               value={details.contenu_reponse as string}
             />
           )}
-        </>
+        </div>
       );
 
     case "saisine_mediateur":
       return (
-        <>
+        <div className="space-y-2">
           {details.mediateur && (
             <DetailRow
               icon={User}
@@ -348,12 +589,12 @@ function renderDetails(type: TypeEtape, details: Record<string, unknown>) {
               success={details.decision === "favorable"}
             />
           )}
-        </>
+        </div>
       );
 
     case "assignation_placement":
       return (
-        <>
+        <div className="space-y-2">
           {details.huissier_nom && (
             <DetailRow
               icon={User}
@@ -389,12 +630,12 @@ function renderDetails(type: TypeEtape, details: Record<string, unknown>) {
               value={details.numero_rg as string}
             />
           )}
-        </>
+        </div>
       );
 
     case "decision_judiciaire":
       return (
-        <>
+        <div className="space-y-2">
           {details.sens_decision && (
             <DetailRow
               icon={Award}
@@ -427,7 +668,7 @@ function renderDetails(type: TypeEtape, details: Record<string, unknown>) {
               )} €`}
             />
           )}
-        </>
+        </div>
       );
 
     default:
@@ -466,7 +707,7 @@ function DetailRow({
 
 // Composant principal
 export function EtapesDossier() {
-  // Données de démonstration - à connecter avec Supabase
+  // Données de démonstration enrichies - à connecter avec Supabase
   const etapes: Etape[] = [
     {
       id: "1",
@@ -484,6 +725,33 @@ export function EtapesDossier() {
         date_reponse: "28/12/2024",
         contenu_reponse: "Refus de remboursement - négligence grave invoquée",
       },
+      pieces: [
+        {
+          id: "p1",
+          nomFichier: "Mise_en_demeure_SG_15122024.pdf",
+          description: "Mise en demeure envoyée à la Société Générale",
+          typePiece: "Mise en demeure",
+          datePiece: "15/12/2024",
+          storagePath: "/documents/...",
+        },
+        {
+          id: "p2",
+          nomFichier: "AR_Mise_en_demeure.pdf",
+          description: "Accusé de réception",
+          typePiece: "Accusé réception",
+          datePiece: "18/12/2024",
+          storagePath: "/documents/...",
+        },
+      ],
+      comptesRendus: [
+        {
+          id: "cr1",
+          titre: "Réponse de la banque",
+          contenu: "La Société Générale a répondu le 28/12/2024 en refusant le remboursement, invoquant une négligence grave de votre part. Cette position est contestable et nous allons poursuivre la procédure.",
+          dateEvenement: "28/12/2024",
+          createdAt: "28/12/2024",
+        },
+      ],
     },
     {
       id: "2",
@@ -498,6 +766,25 @@ export function EtapesDossier() {
         numero_dossier_mediateur: "MED-2025-00123",
         decision: "en_attente",
       },
+      echeances: [
+        {
+          id: "e1",
+          nature: "Délai de réponse du médiateur",
+          date: "10/03/2025",
+          estPassee: false,
+        },
+      ],
+      pieces: [
+        {
+          id: "p3",
+          nomFichier: "Saisine_mediateur_FBF.pdf",
+          description: "Dossier de saisine du médiateur",
+          typePiece: "Saisine",
+          datePiece: "10/01/2025",
+          storagePath: "/documents/...",
+          isNew: true,
+        },
+      ],
     },
     {
       id: "3",
@@ -507,6 +794,14 @@ export function EtapesDossier() {
       description: "Préparation de l'assignation devant le Tribunal",
       datePrevue: "Mars 2025",
       details: {},
+      echeances: [
+        {
+          id: "e2",
+          nature: "Préparation de l'assignation",
+          date: "15/03/2025",
+          estPassee: false,
+        },
+      ],
       sousEtapes: [
         {
           id: "3-1",
@@ -575,4 +870,3 @@ export function EtapesDossier() {
     </Card>
   );
 }
-

@@ -17,7 +17,6 @@ import { createClient } from "@/lib/supabase/client";
 import Image from "next/image";
 import { 
   Menu, 
-  Bell, 
   User, 
   Settings, 
   LogOut,
@@ -25,17 +24,18 @@ import {
   Upload,
   MessageSquare,
   Calendar,
-  LayoutDashboard,
-  HelpCircle
+  HelpCircle,
+  Shield
 } from "lucide-react";
 import Link from "next/link";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 const navItems = [
-  { href: "/dashboard", label: "Tableau de bord", icon: LayoutDashboard },
   { href: "/dashboard/dossier", label: "Mon dossier", icon: FileText },
   { href: "/dashboard/pieces", label: "Mes pièces", icon: Upload },
   { href: "/dashboard/messages", label: "Messages", icon: MessageSquare },
   { href: "/dashboard/rendez-vous", label: "Rendez-vous", icon: Calendar },
+  { href: "/dashboard/securite", label: "Sécurité", icon: Shield },
 ];
 
 export function DashboardHeader() {
@@ -129,10 +129,7 @@ export function DashboardHeader() {
         {/* Actions droite */}
         <div className="flex items-center gap-2">
           {/* Notifications */}
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell className="w-5 h-5" />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-accent rounded-full" />
-          </Button>
+          <NotificationBell />
 
           {/* User menu */}
           <DropdownMenu>
