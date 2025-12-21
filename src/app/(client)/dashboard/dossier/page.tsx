@@ -40,6 +40,7 @@ import {
   Clock,
 } from "lucide-react";
 import Link from "next/link";
+import { EtapesDossier } from "@/components/dossier/EtapesDossier";
 
 // Types de fraudes bancaires
 const typesFraude = [
@@ -203,7 +204,8 @@ La banque refuse de me rembourser en invoquant ma "négligence grave".`);
 
   const reference = genererReference();
 
-  const [montantPrejudice] = useState(5500);
+  const [montantPrejudice, setMontantPrejudice] = useState<number | string>(5500);
+  const [isEditingMontant, setIsEditingMontant] = useState(false);
 
   const documents = [
     {
@@ -442,7 +444,7 @@ La banque refuse de me rembourser en invoquant ma "négligence grave".`);
             className="data-[state=active]:bg-purple-100 data-[state=active]:text-purple-700 data-[state=inactive]:bg-purple-50 data-[state=inactive]:text-purple-600 hover:bg-purple-100 rounded-lg font-medium transition-all"
           >
             <Calendar className="w-4 h-4 mr-2" />
-            Historique
+            Procédure
           </TabsTrigger>
         </TabsList>
 
@@ -753,9 +755,42 @@ La banque refuse de me rembourser en invoquant ma "négligence grave".`);
                     <Euro className="w-4 h-4" />
                     Montant total du préjudice
                   </Label>
-                  <div className="text-2xl font-bold text-foreground">
-                    {montantPrejudice.toLocaleString("fr-FR")} €
-                  </div>
+                  {isEditingMontant ? (
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="number"
+                        value={montantPrejudice}
+                        onChange={(e) => setMontantPrejudice(e.target.value)}
+                        className="w-32 text-lg font-bold"
+                        min={0}
+                        step={100}
+                      />
+                      <span className="text-lg font-bold">€</span>
+                      <Button
+                        size="sm"
+                        onClick={() => setIsEditingMontant(false)}
+                      >
+                        <Save className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl font-bold text-foreground">
+                        {Number(montantPrejudice).toLocaleString("fr-FR")} €
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setIsEditingMontant(true)}
+                        className="text-muted-foreground hover:text-primary"
+                      >
+                        <Edit3 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    Montant estimé de votre préjudice (modifiable)
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -878,53 +913,9 @@ La banque refuse de me rembourser en invoquant ma "négligence grave".`);
           </Card>
         </TabsContent>
 
-        {/* Tab Historique */}
+        {/* Tab Historique / Procédure */}
         <TabsContent value="historique" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="font-serif">Historique des actions</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                {[
-                  {
-                    date: "18 déc. 2024 - 15:30",
-                    action: "Convention d'honoraires signée",
-                    type: "success",
-                  },
-                  {
-                    date: "18 déc. 2024 - 14:00",
-                    action: "Entretien téléphonique réalisé",
-                    type: "success",
-                  },
-                  {
-                    date: "17 déc. 2024 - 10:15",
-                    action: "3 pièces importées",
-                    type: "info",
-                  },
-                  {
-                    date: "17 déc. 2024 - 09:30",
-                    action: "Dossier créé",
-                    type: "info",
-                  },
-                ].map((event, index) => (
-                  <div key={index} className="flex gap-4">
-                    <div
-                      className={`w-2 h-2 rounded-full mt-2 ${
-                        event.type === "success" ? "bg-green-500" : "bg-primary"
-                      }`}
-                    />
-                    <div>
-                      <p className="text-sm text-muted-foreground">
-                        {event.date}
-                      </p>
-                      <p className="font-medium">{event.action}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          <EtapesDossier />
         </TabsContent>
       </Tabs>
 

@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { 
-  LayoutDashboard, 
   FileText, 
   Upload, 
   MessageSquare, 
@@ -15,7 +14,6 @@ import {
 } from "lucide-react";
 
 const navItems = [
-  { href: "/dashboard", label: "Tableau de bord", icon: LayoutDashboard },
   { href: "/dashboard/dossier", label: "Mon dossier", icon: FileText },
   { href: "/dashboard/pieces", label: "Mes pièces", icon: Upload },
   { href: "/dashboard/messages", label: "Messages", icon: MessageSquare, badge: 2 },
