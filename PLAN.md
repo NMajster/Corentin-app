@@ -1,8 +1,43 @@
 # 📋 Plan de Développement - Défense des Épargnants
 
+> **Dernière mise à jour** : 21 décembre 2024
+
 ## 🎯 Vision Produit
 
 Plateforme permettant aux victimes de fraude bancaire d'accéder à une assistance juridique professionnelle à tarif accessible, grâce à l'automatisation par IA sous contrôle humain.
+
+---
+
+## 📊 État Actuel du Projet
+
+### ✅ Réalisé (Phase 1-2)
+
+| Module | Statut | Description |
+|--------|--------|-------------|
+| **Landing Page** | ✅ Complet | Hero, Problem, Solution, Process, Pricing, FAQ, CTA |
+| **Authentification** | ✅ Complet | Magic link, inscription, politique mot de passe fort |
+| **Paiement Stripe** | ✅ Complet | Checkout 90€, création auto compte/dossier après paiement |
+| **Calendrier Cal.com** | ✅ Complet | Réservation RDV après paiement |
+| **Dashboard Client** | ✅ Complet | Redirection vers /dossier, données Supabase réelles |
+| **Page Dossier** | ✅ Complet | Victimes multiples, infos banque, description éditable, type contentieux |
+| **Upload Documents** | ✅ Complet | Supabase Storage, métadonnées, suppression |
+| **Notifications** | ✅ Complet | Bell icon, page notifications, système d'alertes |
+| **Sécurité** | ✅ Complet | 2FA prêt, audit logs, password policy |
+| **Procédure Dossier** | ✅ Complet | Timeline étapes légales, échéances, comptes-rendus, pièces |
+
+### 🚧 En cours
+
+| Module | Statut | Description |
+|--------|--------|-------------|
+| **Back-office Avocat** | 🚧 À faire | Interface de gestion des dossiers côté avocat |
+
+### ⏳ À venir
+
+- Génération de documents (assignations, bordereaux)
+- Signature électronique convention d'honoraires
+- Messagerie temps réel
+- Marketing & SEO
+- Centre de données / Observatoire
 
 ---
 
@@ -941,25 +976,25 @@ gantt
 
 ## ✅ Checklist par Phase
 
-### Phase 1 - Fondations (8 jours)
-- [ ] Créer les tables Supabase (profiles, dossiers, documents, events, etc.)
-- [ ] Configurer Row Level Security (RLS) pour chaque table
-- [ ] Implémenter le middleware de protection des routes par rôle
-- [ ] Configurer Stripe (produit, prix, webhook)
-- [ ] Créer la page de paiement
-- [ ] Implémenter le webhook Stripe (création compte post-paiement)
+### Phase 1 - Fondations (8 jours) ✅ TERMINÉ
+- [x] Créer les tables Supabase (profiles, dossiers, documents, events, etc.)
+- [x] Configurer Row Level Security (RLS) pour chaque table
+- [x] Implémenter le middleware de protection des routes par rôle
+- [x] Configurer Stripe (produit, prix, webhook)
+- [x] Créer la page de paiement
+- [x] Implémenter le webhook Stripe (création compte post-paiement)
 - [ ] Configurer Resend pour les emails transactionnels
 - [ ] Email de bienvenue + validation
 
-### Phase 2 - Espace Client (8 jours)
-- [ ] Système de créneaux disponibles
-- [ ] Interface de réservation RDV
-- [ ] Confirmation + rappels email
-- [ ] Upload de fichiers vers Supabase Storage
-- [ ] Formulaire métadonnées documents
-- [ ] Liste des documents avec statuts
-- [ ] Dashboard avec timeline dossier
-- [ ] Affichage comptes rendus publiés
+### Phase 2 - Espace Client (8 jours) ✅ TERMINÉ
+- [x] Système de créneaux disponibles (Cal.com)
+- [x] Interface de réservation RDV
+- [x] Confirmation + rappels email (via Cal.com)
+- [x] Upload de fichiers vers Supabase Storage
+- [x] Formulaire métadonnées documents
+- [x] Liste des documents avec statuts
+- [x] Dashboard avec timeline dossier
+- [x] Affichage comptes rendus publiés (structure prête)
 - [ ] Interface de messagerie simple
 
 ### Phase 3 - Back-Office (9 jours)
