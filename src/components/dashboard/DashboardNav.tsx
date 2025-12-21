@@ -10,7 +10,8 @@ import {
   MessageSquare, 
   Calendar,
   HelpCircle,
-  ExternalLink
+  ExternalLink,
+  Shield,
 } from "lucide-react";
 
 const navItems = [
@@ -19,6 +20,7 @@ const navItems = [
   { href: "/dashboard/pieces", label: "Mes pièces", icon: Upload },
   { href: "/dashboard/messages", label: "Messages", icon: MessageSquare, badge: 2 },
   { href: "/dashboard/rendez-vous", label: "Rendez-vous", icon: Calendar },
+  { href: "/dashboard/securite", label: "Sécurité", icon: Shield },
 ];
 
 export function DashboardNav() {

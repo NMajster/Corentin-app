@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
 import Image from "next/image";
 import { Mail, Lock, User, Phone, ArrowRight, AlertCircle, CheckCircle } from "lucide-react";
+import { PasswordStrengthIndicator } from "@/components/auth/PasswordStrengthIndicator";
+import { validatePassword } from "@/lib/security/password-policy";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -36,15 +38,16 @@ export default function SignupPage() {
     setError(null);
     setLoading(true);
 
-    // Validation
-    if (formData.password !== formData.confirmPassword) {
-      setError("Les mots de passe ne correspondent pas");
+    // Validation du mot de passe
+    const passwordValidation = validatePassword(formData.password);
+    if (!passwordValidation.isValid) {
+      setError("Le mot de passe ne respecte pas les exigences de sécurité");
       setLoading(false);
       return;
     }
 
-    if (formData.password.length < 8) {
-      setError("Le mot de passe doit contenir au moins 8 caractères");
+    if (formData.password !== formData.confirmPassword) {
+      setError("Les mots de passe ne correspondent pas");
       setLoading(false);
       return;
     }
@@ -217,17 +220,15 @@ export default function SignupPage() {
               id="password"
               name="password"
               type="password"
-              placeholder="••••••••"
+              placeholder="••••••••••••"
               value={formData.password}
               onChange={handleChange}
               className="pl-11"
               required
-              minLength={8}
+              minLength={12}
             />
           </div>
-          <p className="text-xs text-muted-foreground">
-            Minimum 8 caractères
-          </p>
+          <PasswordStrengthIndicator password={formData.password} />
         </div>
 
         <div className="space-y-2">
