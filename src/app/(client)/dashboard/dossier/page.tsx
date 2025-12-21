@@ -37,6 +37,7 @@ import {
   X,
   MapPin,
   CreditCard,
+  Clock,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -54,7 +55,7 @@ const typesFraude = [
 
 // Statuts du dossier
 type StatutDossier = 
-  | "convention_en_redaction"
+  | "en_attente_convention"
   | "convention_en_attente_signature"
   | "dossier_actif"
   | "mise_en_demeure"
@@ -69,9 +70,9 @@ const statutsConfig: Record<StatutDossier, {
   borderColor: string;
   etape: number;
 }> = {
-  convention_en_redaction: {
-    label: "Convention en cours de rédaction",
-    description: "L'avocat prépare votre convention d'honoraires",
+  en_attente_convention: {
+    label: "En attente de la convention",
+    description: "Votre avocat prépare la convention d'honoraires, vous serez notifié dès qu'elle sera prête",
     color: "text-amber-700",
     bgColor: "bg-amber-50",
     borderColor: "border-amber-200",
@@ -294,7 +295,7 @@ La banque refuse de me rembourser en invoquant ma "négligence grave".`);
               <div className={`w-3 h-3 rounded-full ${
                 dossier.statut === "dossier_actif" ? "bg-emerald-500 animate-pulse" :
                 dossier.statut === "convention_en_attente_signature" ? "bg-orange-500" :
-                dossier.statut === "convention_en_redaction" ? "bg-amber-500" :
+                dossier.statut === "en_attente_convention" ? "bg-amber-500 animate-pulse" :
                 "bg-gray-400"
               }`} />
               <div>
@@ -308,6 +309,12 @@ La banque refuse de me rembourser en invoquant ma "négligence grave".`);
             </div>
             
             {/* Action selon le statut */}
+            {dossier.statut === "en_attente_convention" && (
+              <Badge className="bg-amber-100 text-amber-700 border border-amber-300">
+                <Clock className="w-3 h-3 mr-1" />
+                En préparation
+              </Badge>
+            )}
             {dossier.statut === "convention_en_attente_signature" && (
               <Button className="bg-orange-600 hover:bg-orange-700">
                 <FileText className="w-4 h-4 mr-2" />
@@ -318,35 +325,39 @@ La banque refuse de me rembourser en invoquant ma "négligence grave".`);
 
           {/* Indicateur d'étapes simplifié */}
           <div className="mt-4 flex items-center gap-2">
-            {[1, 2, 3].map((etape) => (
-              <div key={etape} className="flex items-center">
+            {[
+              { num: 0, label: "Entretien" },
+              { num: 1, label: "Convention" },
+              { num: 2, label: "Signature" },
+              { num: 3, label: "Dossier actif" },
+            ].map((etape, index) => (
+              <div key={etape.num} className="flex items-center">
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                  etape < statutActuel.etape 
+                  etape.num < statutActuel.etape 
                     ? "bg-emerald-500 text-white" 
-                    : etape === statutActuel.etape
+                    : etape.num === statutActuel.etape
                     ? `${statutActuel.bgColor} ${statutActuel.color} border-2 ${statutActuel.borderColor}`
                     : "bg-gray-100 text-gray-400"
                 }`}>
-                  {etape < statutActuel.etape ? (
+                  {etape.num < statutActuel.etape ? (
                     <CheckCircle className="w-4 h-4" />
                   ) : (
-                    etape
+                    etape.num === 0 ? "✓" : etape.num
                   )}
                 </div>
-                {etape < 3 && (
-                  <div className={`w-12 h-1 mx-1 rounded ${
-                    etape < statutActuel.etape ? "bg-emerald-500" : "bg-gray-200"
+                {index < 3 && (
+                  <div className={`w-8 h-1 mx-1 rounded ${
+                    etape.num < statutActuel.etape ? "bg-emerald-500" : "bg-gray-200"
                   }`} />
                 )}
               </div>
             ))}
-            <div className="ml-4 text-xs text-muted-foreground hidden md:block">
-              <span className={statutActuel.etape >= 1 ? "text-emerald-600" : ""}>Entretien</span>
-              {" → "}
-              <span className={statutActuel.etape >= 2 ? "text-emerald-600" : ""}>Convention</span>
-              {" → "}
-              <span className={statutActuel.etape >= 3 ? "text-emerald-600" : ""}>Dossier actif</span>
-            </div>
+          </div>
+          <div className="mt-2 flex items-center gap-6 text-xs text-muted-foreground">
+            <span className="text-emerald-600 font-medium">✓ Entretien</span>
+            <span className={statutActuel.etape >= 1 ? "text-emerald-600 font-medium" : ""}>Convention</span>
+            <span className={statutActuel.etape >= 2 ? "text-emerald-600 font-medium" : ""}>Signature</span>
+            <span className={statutActuel.etape >= 3 ? "text-emerald-600 font-medium" : ""}>Dossier actif</span>
           </div>
         </CardContent>
       </Card>
